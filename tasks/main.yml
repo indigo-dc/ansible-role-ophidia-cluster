@@ -1,0 +1,8 @@
+- include: ubuntu14.yml
+  when: ansible_os_family == 'Debian'
+  tags: package
+
+- include: centos7.yml
+  when: ansible_os_family == 'RedHat'
+  tags: package
+

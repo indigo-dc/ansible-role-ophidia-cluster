@@ -1,0 +1,4 @@
+---
+- hosts: localhost
+  roles:
+    - { role: indigo-dc.ophidia-all }
