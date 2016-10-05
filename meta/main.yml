@@ -2,7 +2,7 @@ galaxy_info:
   author: ophidia-info@lists.cmcc.it
   description: Ophidia Cluster
   company: CMCC
-  license: 
+  license: Apache
   min_ansible_version: 2.1
   platforms:
   - name: EL

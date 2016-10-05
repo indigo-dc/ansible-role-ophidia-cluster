@@ -52,6 +52,12 @@ Further documentation
 * Ophidia: http://ophidia.cmcc.it/documentation/
 * Installation and configuration: http://ophidia.cmcc.it/documentation/admin/index.html
 
+License
+-------
+
+Apache v2
+
+
 Author information
 ------------------
 
