@@ -19,21 +19,14 @@
   with_items:
     - compat-guile18
     - curl
-    - dejavu-fonts-common
-    - dejavu-sans-mono-fonts
     - flex
     - gcc-c++
-    - git
-    - graphviz
     - gsoap
     - gsl
-    - gtk2
     - guile
     - hdf5-mpich
     - httpd
-    - indent
     - jansson
-    - lcov
     - libcurl
     - libssh2
     - libtool-ltdl
@@ -42,19 +35,12 @@
     - mpich-autoload
     - mysql-community-devel
     - mysql-community-server
-    - MySQL-python
     - munge
     - munge-libs
     - netcdf-mpich
     - openssl
-    - php
-    - policycoreutils-python
-    - python-pip
-    - readline
-    - rrdtool
     - sudo
     - wget
-    - bzip2
 
 - name: RedHat | 2nd set of packages slurm ophidia and libmatheval - the ones from the indigo repos
   yum: name={{ item }} state=latest update_cache=yes disable_gpg_check=yes
@@ -62,21 +48,9 @@
     - libmatheval
     - ophidia-analytics-framework
     - ophidia-primitives
-    - ophidia-server
-    - ophidia-terminal
     - slurm
     - slurm-munge
-    - slurm-openlava
-    - slurm-pam_slurm
-    - slurm-perlapi
     - slurm-plugins
-    - slurm-seff
-    - slurm-sjobexit
-    - slurm-sjstat
-    - slurm-slurmdb-direct
-    - slurm-slurmdbd
-    - slurm-sql
-    - slurm-torque
 
 #################################################
 # Tasks for configuration
@@ -95,14 +69,6 @@
     regexp=^requiretty
     line='Defaults    !requiretty'
 
-- name: RedHat | Copy template of ophidia server server.conf
-  template:
-    src=server.conf.j2
-    dest=/usr/local/ophidia/oph-server/etc/server.conf
-    mode=0644
-    owner=root
-    group=root
-
 - name: RedHat | Copy template of slurm.conf
   template:
     src=slurm.conf.j2
@@ -120,86 +86,8 @@
 - name: RedHat | Set permissions on /etc/munge/munge.key
   file: path=/etc/munge/munge.key mode=400 owner=munge group=root
 
-- name: RedHat | Creating root SSL cert
-  command: >
-    openssl req
-      -newkey rsa:1024
-      -passout pass:{{ cert_passwd }}
-      -subj "/"
-      -sha1
-      -keyout rootkey.pem
-      -out rootreq.pem
-  args:
-    chdir: /usr/local/ophidia/oph-server/etc/cert
-
-- name: RedHat | Sign root SSL cert
-  command: >
-    openssl x509
-      -req
-      -in rootreq.pem
-      -passin pass:{{ cert_passwd }}
-      -sha1
-      -extensions v3_ca
-      -signkey rootkey.pem
-      -out rootcert.pem
-  args:
-    chdir: /usr/local/ophidia/oph-server/etc/cert
-
-- name: RedHat | merge cert and key of root cert
-  shell: cat rootcert.pem rootkey.pem > cacert.pem
-  args:
-    chdir: /usr/local/ophidia/oph-server/etc/cert
-    executable: /bin/bash
-
-- name: RedHat | Creating server SSL cert
-  command: >
-    openssl req
-      -newkey rsa:1024
-      -passout pass:{{ cert_passwd }}
-      -subj "/"
-      -sha1
-      -keyout serverkey.pem
-      -out serverreq.pem
-  args:
-    chdir: /usr/local/ophidia/oph-server/etc/cert
-
-- name: RedHat | Sign server SSL cert
-  command: >
-    openssl x509
-      -req
-      -in serverreq.pem
-      -passin pass:{{ cert_passwd }}
-      -sha1
-      -extensions usr_cert
-      -CA cacert.pem
-      -CAkey cacert.pem
-      -CAcreateserial
-      -out servercert.pem
-  args:
-    chdir: /usr/local/ophidia/oph-server/etc/cert
-
-- name: RedHat | merge cert and key of server cert
-  shell: cat servercert.pem serverkey.pem rootcert.pem > myserver.pem
-  args:
-    chdir: /usr/local/ophidia/oph-server/etc/cert
-    executable: /bin/bash
-
-- name: RedHat | Remove intermediate certs
-  file: path={{ item }} state=absent
-  with_items:
-    - /usr/local/ophidia/oph-server/etc/cert/rootcert.pem
-    - /usr/local/ophidia/oph-server/etc/cert/rootkey.pem
-    - /usr/local/ophidia/oph-server/etc/cert/rootreq.pem
-    - /usr/local/ophidia/oph-server/etc/cert/servercert.pem
-    - /usr/local/ophidia/oph-server/etc/cert/serverkey.pem
-    - /usr/local/ophidia/oph-server/etc/cert/serverreq.pem
-    - /usr/local/ophidia/oph-server/etc/cert/cacert.srl
-
 #######################################################
 # Tasks to setup/config mysql and necessary databases
-
-# TODO: for now the service will have to be started manually
-# will have to figure out the problems of centos7 systemd
 - name: RedHat | ownership mysql for /var/log/mysqld.log
   file: path=/var/log/mysqld.log owner=mysql group=root
 
@@ -218,14 +106,6 @@
   args:
     executable: /bin/bash
 
-####
-# This task is the correct way to set the mysql roo passwd but not working properly
-# will have to check the problem
-#
-#- name: RedHat | set the mysql root user passwd
-#  mysql_user: name=root password={{ cert_passwd }}
-
-# this task is temporary: set explicitely the mysql root passwd
 - name: RedHat | Set mysql root passwd
   command: /usr/bin/mysqladmin -u root password '{{ cert_passwd }}'
 
@@ -251,20 +131,6 @@
     - ophidiadb
     - oph_dimensions
 
-- name: RedHat | import ophidia analytics db
-  mysql_db: name=ophidiadb state=import target=/usr/local/ophidia/oph-cluster/oph-analytics-framework/etc/ophidiadb.sql
-
-- name: RedHat | Copy template of .my.cnf to root
-  template:
-    src=ophdb-host.sql.j2
-    dest=/tmp/ophdb-host.sql
-    mode=0600
-    owner=root
-    group=root
-
-- name: RedHat | import ophdb-host.sql
-  mysql_db: name=ophidiadb state=import target=/tmp/ophdb-host.sql
-
 - name: RedHat | import primitives
   mysql_db: name=mysql state=import target=/usr/local/ophidia/oph-cluster/oph-primitives/etc/create_func.sql
 
@@ -278,140 +144,6 @@
 - name: RedHat | start slurmd
   command: /usr/sbin/slurmd
 
-- name: RedHat | start slurmctld
-  command: /usr/sbin/slurmctld
-
-- name: RedHat | start httpd
-  command: /usr/sbin/httpd
-
 - name: RedHat | start sshd
   command: /usr/sbin/sshd
-
-#######################################################
-# Tasks to generate DSA keys for oph_user
-- name: RedHat | key generation
-  shell: ssh-keygen -t dsa -f /home/{{ oph_user }}/.ssh/id_dsa -N ""
-  args:
-    executable: /bin/bash
-  become: yes
-  become_user: "{{ oph_user }}"
-
-- name: RedHat | Copy the key to authorized_keys file
-  shell: cat id_dsa.pub >> authorized_keys
-  args:
-    chdir: /home/{{ oph_user }}/.ssh
-    executable: /bin/bash
-  become: yes
-  become_user: "{{ oph_user }}"
-
-- name: RedHat | Set permissions on authorized_keys
-  file: path=/home/{{ oph_user }}/.ssh/authorized_keys mode=600 owner={{ oph_user }} group={{ oph_user }}
-  become: yes
-  become_user: "{{ oph_user }}"
-
-- name: RedHat | Remove nologin
-  file: path=/run/nologin state=absent
-
-#######################################################
-# Tasks to set permissions
-- name: RedHat | Set permissions on Ophidia folders
-  file: path=/usr/local/ophidia owner={{ oph_user }} group={{ oph_user }} state=directory recurse=yes
-
-- name: RedHat | Set permissions on Ophidia web space
-  file: path=/var/www/html/ophidia owner={{ oph_user }} group={{ oph_user }} state=directory recurse=yes
-
-#######################################################
-# Task to start Ophidia service
-- name: RedHat | Start ophidia server
-  shell: oph_server 2>&1 > /dev/null &
-  args:
-    executable: /bin/bash
-  become: yes
-  become_user: "{{ oph_user }}"
-
-#######################################################
-# Tasks to install UV-CDAT
-- name: RedHat | Create extra folder for Python
-  file: path=/usr/local/ophidia/extra/src state=directory mode=0755 owner={{ oph_user }} group={{ oph_user }}
-  become: yes
-  become_user: "{{ oph_user }}"
-
-- name: RedHat | Download Python
-  get_url:
-    url: https://www.python.org/ftp/python/3.5.0/Python-3.5.0.tgz
-    dest: /usr/local/ophidia/extra/src
-    force_basic_auth: yes
-  become: yes
-  become_user: "{{ oph_user }}"
-
-- name: RedHat | Extract Python
-  unarchive: src=/usr/local/ophidia/extra/src/Python-3.5.0.tgz dest=/usr/local/ophidia/extra/src
-  become: yes
-  become_user: "{{ oph_user }}"
-
-- name: RedHat | Install Python
-  shell:
-    cd /usr/local/ophidia/extra/src/Python-3.5.0 && ./configure --prefix=/usr/local/ophidia/extra > /dev/null 2>&1 && make > /dev/null 2>&1 && make altinstall > /dev/null 2>&1
-  args:
-    executable: /bin/bash
-  become: yes
-  become_user: "{{ oph_user }}"
-
-- name: RedHat | Download Anaconda
-  get_url:
-    url: http://repo.continuum.io/archive/Anaconda3-4.0.0-Linux-x86_64.sh
-    dest: /usr/local/ophidia/extra/src
-    force_basic_auth: yes
-  become: yes
-  become_user: "{{ oph_user }}"
-
-- name: RedHat | Make executable the Anaconda script
-  file: path=/usr/local/ophidia/extra/src/Anaconda3-4.0.0-Linux-x86_64.sh mode=0755 owner={{ oph_user }} group={{ oph_user }}
-  become: yes
-  become_user: "{{ oph_user }}"
-
-- name: RedHat | Install Anaconda
-  shell:
-    ./Anaconda3-4.0.0-Linux-x86_64.sh -b -p /usr/local/ophidia/extra/anaconda3 > /dev/null 2>&1
-  args:
-    executable: /bin/bash
-    chdir: /usr/local/ophidia/extra/src
-  become: yes
-  become_user: "{{ oph_user }}"
-  environment:
-    PATH: "/usr/local/ophidia/extra/bin:{{ ansible_env.PATH }}"
-
-- name: RedHat | Create ophidia-nox
-  shell:
-    conda create -y -n ophidia-nox -c uvcdat/label/nightly -c uvcdat uvcdat-nox
-  args:
-    executable: /bin/bash
-  become: yes
-  become_user: "{{ oph_user }}"
-  environment:
-    PATH: "/usr/local/ophidia/extra/anaconda3/bin:{{ ansible_env.PATH }}"
-
-- name: RedHat | Update PATH
-  lineinfile:
-    dest=/home/{{ oph_user }}/.bashrc
-    regexp=''
-    insertafter=EOF
-    line='export PATH=/usr/local/ophidia/extra/anaconda3/bin:/usr/local/ophidia/extra/bin:$PATH'
-  become: yes
-  become_user: "{{ oph_user }}"
-
-#######################################################
-# Tasks to configure the workflows
-- name: RedHat | Download the workflows
-  git: repo=https://github.com/OphidiaBigData/ophidia-workflow-catalogue.git dest=/home/{{ oph_user }}/ophidia-workflow-catalogue
-  become: yes
-  become_user: "{{ oph_user }}"
-
-- name: RedHat | Copy template of ophidia script oph_script_configuration
-  template:
-    src=oph_script_configuration.j2
-    dest=/usr/local/ophidia/oph-cluster/oph-analytics-framework/etc/oph_script_configuration
-    mode=0644
-    owner={{ oph_user }}
-    group={{ oph_user }}
 

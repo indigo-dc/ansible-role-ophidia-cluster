@@ -19,72 +19,39 @@
   with_items:
     - compat-guile18
     - curl
-    - dejavu-fonts-common
-    - dejavu-sans-mono-fonts
     - flex
     - gcc-c++
-    - git
-    - graphviz
     - gsoap
-    - gsl
-    - gtk2
     - guile
     - hdf5-mpich
     - httpd
-    - indent
     - jansson
-    - lcov
     - libcurl
     - libssh2
-    - libtool-ltdl
     - libxml2
     - mpich
     - mpich-autoload
     - mysql-community-devel
     - mysql-community-server
-    - MySQL-python
     - munge
     - munge-libs
     - netcdf-mpich
     - openssl
     - php
-    - policycoreutils-python
-    - python-pip
-    - readline
-    - rrdtool
     - sudo
     - wget
-    - bzip2
 
 - name: RedHat | 2nd set of packages slurm ophidia and libmatheval - the ones from the indigo repos
   yum: name={{ item }} state=latest update_cache=yes disable_gpg_check=yes
   with_items:
     - libmatheval
-    - ophidia-analytics-framework
-    - ophidia-primitives
     - ophidia-server
-    - ophidia-terminal
     - slurm
     - slurm-munge
-    - slurm-openlava
-    - slurm-pam_slurm
-    - slurm-perlapi
     - slurm-plugins
-    - slurm-seff
-    - slurm-sjobexit
-    - slurm-sjstat
-    - slurm-slurmdb-direct
-    - slurm-slurmdbd
-    - slurm-sql
-    - slurm-torque
 
 #################################################
 # Tasks for configuration
-- name: RedHat | Copy oph-primitives/lib to /usr/lib64/mysql/plugin
-  shell: cp /usr/local/ophidia/oph-cluster/oph-primitives/lib/liboph_*.so /usr/lib64/mysql/plugin/
-  args:
-    executable: /bin/bash
-
 - name: RedHat | Create user for Ophidia framwork
   user: name={{ oph_user }} shell=/bin/bash generate_ssh_key=yes ssh_key_bits=2048
 
@@ -197,9 +164,6 @@
 
 #######################################################
 # Tasks to setup/config mysql and necessary databases
-
-# TODO: for now the service will have to be started manually
-# will have to figure out the problems of centos7 systemd
 - name: RedHat | ownership mysql for /var/log/mysqld.log
   file: path=/var/log/mysqld.log owner=mysql group=root
 
@@ -218,14 +182,6 @@
   args:
     executable: /bin/bash
 
-####
-# This task is the correct way to set the mysql roo passwd but not working properly
-# will have to check the problem
-#
-#- name: RedHat | set the mysql root user passwd
-#  mysql_user: name=root password={{ cert_passwd }}
-
-# this task is temporary: set explicitely the mysql root passwd
 - name: RedHat | Set mysql root passwd
   command: /usr/bin/mysqladmin -u root password '{{ cert_passwd }}'
 
@@ -265,18 +221,12 @@
 - name: RedHat | import ophdb-host.sql
   mysql_db: name=ophidiadb state=import target=/tmp/ophdb-host.sql
 
-- name: RedHat | import primitives
-  mysql_db: name=mysql state=import target=/usr/local/ophidia/oph-cluster/oph-primitives/etc/create_func.sql
-
 #######################################################
 # Tasks to start the services
 - name: RedHat | start munged
   command: /usr/sbin/munged
   become: true
   become_user: munge
-
-- name: RedHat | start slurmd
-  command: /usr/sbin/slurmd
 
 - name: RedHat | start slurmctld
   command: /usr/sbin/slurmctld
@@ -328,90 +278,4 @@
     executable: /bin/bash
   become: yes
   become_user: "{{ oph_user }}"
-
-#######################################################
-# Tasks to install UV-CDAT
-- name: RedHat | Create extra folder for Python
-  file: path=/usr/local/ophidia/extra/src state=directory mode=0755 owner={{ oph_user }} group={{ oph_user }}
-  become: yes
-  become_user: "{{ oph_user }}"
-
-- name: RedHat | Download Python
-  get_url:
-    url: https://www.python.org/ftp/python/3.5.0/Python-3.5.0.tgz
-    dest: /usr/local/ophidia/extra/src
-    force_basic_auth: yes
-  become: yes
-  become_user: "{{ oph_user }}"
-
-- name: RedHat | Extract Python
-  unarchive: src=/usr/local/ophidia/extra/src/Python-3.5.0.tgz dest=/usr/local/ophidia/extra/src
-  become: yes
-  become_user: "{{ oph_user }}"
-
-- name: RedHat | Install Python
-  shell:
-    cd /usr/local/ophidia/extra/src/Python-3.5.0 && ./configure --prefix=/usr/local/ophidia/extra > /dev/null 2>&1 && make > /dev/null 2>&1 && make altinstall > /dev/null 2>&1
-  args:
-    executable: /bin/bash
-  become: yes
-  become_user: "{{ oph_user }}"
-
-- name: RedHat | Download Anaconda
-  get_url:
-    url: http://repo.continuum.io/archive/Anaconda3-4.0.0-Linux-x86_64.sh
-    dest: /usr/local/ophidia/extra/src
-    force_basic_auth: yes
-  become: yes
-  become_user: "{{ oph_user }}"
-
-- name: RedHat | Make executable the Anaconda script
-  file: path=/usr/local/ophidia/extra/src/Anaconda3-4.0.0-Linux-x86_64.sh mode=0755 owner={{ oph_user }} group={{ oph_user }}
-  become: yes
-  become_user: "{{ oph_user }}"
-
-- name: RedHat | Install Anaconda
-  shell:
-    ./Anaconda3-4.0.0-Linux-x86_64.sh -b -p /usr/local/ophidia/extra/anaconda3 > /dev/null 2>&1
-  args:
-    executable: /bin/bash
-    chdir: /usr/local/ophidia/extra/src
-  become: yes
-  become_user: "{{ oph_user }}"
-  environment:
-    PATH: "/usr/local/ophidia/extra/bin:{{ ansible_env.PATH }}"
-
-- name: RedHat | Create ophidia-nox
-  shell:
-    conda create -y -n ophidia-nox -c uvcdat/label/nightly -c uvcdat uvcdat-nox
-  args:
-    executable: /bin/bash
-  become: yes
-  become_user: "{{ oph_user }}"
-  environment:
-    PATH: "/usr/local/ophidia/extra/anaconda3/bin:{{ ansible_env.PATH }}"
-
-- name: RedHat | Update PATH
-  lineinfile:
-    dest=/home/{{ oph_user }}/.bashrc
-    regexp=''
-    insertafter=EOF
-    line='export PATH=/usr/local/ophidia/extra/anaconda3/bin:/usr/local/ophidia/extra/bin:$PATH'
-  become: yes
-  become_user: "{{ oph_user }}"
-
-#######################################################
-# Tasks to configure the workflows
-- name: RedHat | Download the workflows
-  git: repo=https://github.com/OphidiaBigData/ophidia-workflow-catalogue.git dest=/home/{{ oph_user }}/ophidia-workflow-catalogue
-  become: yes
-  become_user: "{{ oph_user }}"
-
-- name: RedHat | Copy template of ophidia script oph_script_configuration
-  template:
-    src=oph_script_configuration.j2
-    dest=/usr/local/ophidia/oph-cluster/oph-analytics-framework/etc/oph_script_configuration
-    mode=0644
-    owner={{ oph_user }}
-    group={{ oph_user }}
 
