@@ -1,8 +1,8 @@
 galaxy_info:
-  author: mariojmdavid@gmail.com
-  description: Ophidia Big Data framework
-  company: LIP and INDIGO-DataCloud
-  license: Apache
+  author: ophidia-info@lists.cmcc.it
+  description: Ophidia Cluster
+  company: CMCC
+  license: 
   min_ansible_version: 2.1
   platforms:
   - name: EL

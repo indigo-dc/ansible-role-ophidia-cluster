@@ -1,4 +1,4 @@
 ---
 - hosts: localhost
   roles:
-    - { role: indigo-dc.ophidia-all }
+    - { role: indigo-dc.ophidia-cluster }
