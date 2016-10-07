@@ -1,7 +1,7 @@
 Role Name
 =========
 
-The ansible role deploys and configures all services for the Ophidia
+The ansible role deploys and configures all services for an Ophidia cluster
 
 Introduction
 ------------
@@ -31,7 +31,7 @@ Example Playbook
 ----------------
 
 
-An example of playbook to deploy ambertools:
+An example of playbook to deploy Ophidia:
 
 ```
 ---

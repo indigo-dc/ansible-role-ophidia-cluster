@@ -25,7 +25,6 @@
     - gsl
     - guile
     - hdf5-mpich
-    - httpd
     - jansson
     - libcurl
     - libssh2
@@ -35,12 +34,14 @@
     - mpich-autoload
     - mysql-community-devel
     - mysql-community-server
+    - MySQL-python
     - munge
     - munge-libs
     - netcdf-mpich
     - openssl
     - sudo
     - wget
+    - nfs-utils
 
 - name: RedHat | 2nd set of packages slurm ophidia and libmatheval - the ones from the indigo repos
   yum: name={{ item }} state=latest update_cache=yes disable_gpg_check=yes
@@ -124,12 +125,6 @@
     mode=0600
     owner=root
     group=root
-
-- name: RedHat | create ophidia databases
-  mysql_db: name={{ item }} state=present
-  with_items:
-    - ophidiadb
-    - oph_dimensions
 
 - name: RedHat | import primitives
   mysql_db: name=mysql state=import target=/usr/local/ophidia/oph-cluster/oph-primitives/etc/create_func.sql

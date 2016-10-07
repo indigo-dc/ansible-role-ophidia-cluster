@@ -23,7 +23,6 @@
     - gcc-c++
     - gsoap
     - guile
-    - hdf5-mpich
     - httpd
     - jansson
     - libcurl
@@ -33,19 +32,23 @@
     - mpich-autoload
     - mysql-community-devel
     - mysql-community-server
+    - MySQL-python
+    - hdf5-mpich
+    - netcdf-mpich
     - munge
     - munge-libs
-    - netcdf-mpich
     - openssl
     - php
     - sudo
     - wget
+    - nfs-utils
 
 - name: RedHat | 2nd set of packages slurm ophidia and libmatheval - the ones from the indigo repos
   yum: name={{ item }} state=latest update_cache=yes disable_gpg_check=yes
   with_items:
     - libmatheval
     - ophidia-server
+    - ophidia-analytics-framework
     - slurm
     - slurm-munge
     - slurm-plugins
