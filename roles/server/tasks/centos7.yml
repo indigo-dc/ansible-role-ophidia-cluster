@@ -42,6 +42,7 @@
     - sudo
     - wget
     - nfs-utils
+    - java-1.7.0-openjdk
 
 - name: RedHat | 2nd set of packages slurm ophidia and libmatheval - the ones from the indigo repos
   yum: name={{ item }} state=latest update_cache=yes disable_gpg_check=yes
@@ -284,4 +285,82 @@
     executable: /bin/bash
   become: yes
   become_user: "{{ oph_user }}"
+
+#################################################
+# Tasks to install Tomcat and Thredds
+- name: RedHat | Download Tomcat
+  get_url:
+    url: "{{ tomcat_url }}"
+    dest: /usr/local/ophidia/extra
+    force_basic_auth: yes
+    timeout: 1000
+  become: yes
+  become_user: "{{ oph_user }}"
+
+- name: RedHat | Extract Tomcat
+  unarchive: src=/usr/local/ophidia/extra/{{ tomcat }}.tar.gz dest=/usr/local/ophidia/extra
+  become: yes
+  become_user: "{{ oph_user }}"
+
+- name: RedHat | Configure Tomcat
+  template:
+    src=roles/server/templates/server.xml.j2
+    dest=/usr/local/ophidia/extra/{{ tomcat }}/conf/server.xml
+    mode=0644
+    owner={{ oph_user }}
+    group={{ oph_user }}
+
+- name: RedHat | Configure Tomcat
+  template:
+    src=roles/server/templates/setenv.sh.j2
+    dest=/usr/local/ophidia/extra/{{ tomcat }}/bin/setenv.sh
+    mode=0644
+    owner={{ oph_user }}
+    group={{ oph_user }}
+
+- name: RedHat | Run Tomcat
+  shell:
+    /usr/local/ophidia/extra/{{ tomcat }}/bin/startup.sh
+  args:
+    executable: /bin/bash
+  become: yes
+  become_user: "{{ oph_user }}"
+
+- name: RedHat | Download Thredds
+  get_url:
+    url: "{{ thredds_url }}"
+    dest: /usr/local/ophidia/extra
+    force_basic_auth: yes
+    timeout: 1000
+  become: yes
+  become_user: "{{ oph_user }}"
+
+- name: RedHat | Deploy Thredds
+  command: mv /usr/local/ophidia/extra/{{ thredds }} /usr/local/ophidia/extra/{{ tomcat }}/webapps/thredds.war
+  become: yes
+  become_user: "{{ oph_user }}"
+
+- name: RedHat | Create base folder
+  file: path={{ base_path }} owner={{ oph_user }} group={{ oph_user }} state=directory recurse=yes
+
+- name: RedHat | Wait for Thredds deploy
+  shell: sleep 20
+  args:
+    executable: /bin/bash
+
+- name: RedHat | Configure Thredds
+  template:
+    src=roles/server/templates/catalog.xml.j2
+    dest=/usr/local/ophidia/extra/{{ tomcat }}/content/thredds/catalog.xml
+    mode=0644
+    owner={{ oph_user }}
+    group={{ oph_user }}
+
+- name: RedHat | Configure Thredds
+  template:
+    src=roles/server/templates/threddsConfig.xml.j2
+    dest=/usr/local/ophidia/extra/{{ tomcat }}/content/thredds/threddsConfig.xml
+    mode=0644
+    owner={{ oph_user }}
+    group={{ oph_user }}
 

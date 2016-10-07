@@ -1,4 +1,9 @@
 ---
 cert_passwd: 'abcd'
 oph_user: 'ophuser'
+tomcat: 'apache-tomcat-7.0.72'
+tomcat_url: 'http://it.apache.contactlab.it/tomcat/tomcat-7/v7.0.72/bin/apache-tomcat-7.0.72.tar.gz'
+thredds: 'tds-4.6.6.war'
+thredds_url: 'http://artifacts.unidata.ucar.edu/content/repositories/unidata-releases/edu/ucar/tds/4.6.6/tds-4.6.6.war'
+base_path: '/data/repository'
 
