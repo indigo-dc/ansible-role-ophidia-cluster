@@ -81,6 +81,9 @@
     owner=root
     group=root
 
+- name: RedHat | Creates slurmd spool directory
+  file: path=/var/spool/slurmd state=directory owner=root group=root
+
 - name: RedHat | ownership of /etc/munge
   file: path=/etc/munge owner=munge group=root
 
