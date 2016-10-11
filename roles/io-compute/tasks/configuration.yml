@@ -1,0 +1,103 @@
+#################################################
+# Tasks for general configuration
+- name: RedHat | Copy template of oph_configuration
+  template:
+    src=oph_configuration.j2
+    dest=/usr/local/ophidia/oph-cluster/oph-analytics-framework/etc/oph_configuration
+    mode=0644
+    owner={{ oph_user }}
+    group={{ oph_user }}
+
+- name: RedHat | Copy template of oph_dim_configuration
+  template:
+    src=oph_dim_configuration.j2
+    dest=/usr/local/ophidia/oph-cluster/oph-analytics-framework/etc/oph_configuration
+    mode=0644
+    owner={{ oph_user }}
+    group={{ oph_user }}
+
+- name: RedHat | Copy template of oph_soap_configuration
+  template:
+    src=oph_soap_configuration.j2
+    dest=/usr/local/ophidia/oph-cluster/oph-analytics-framework/etc/oph_soap_configuration
+    mode=0644
+    owner={{ oph_user }}
+    group={{ oph_user }}
+
+- name: RedHat | Copy template of slurm.conf
+  template:
+    src=slurm.conf.j2
+    dest=/etc/slurm/slurm.conf
+    mode=0644
+    owner=root
+    group=root
+
+- name: RedHat | Make munge private key
+  shell: dd if=/dev/urandom bs=1 count=1024 > /etc/munge/munge.key
+
+- name: RedHat | Set permissions on /etc/munge/munge.key
+  file: path=/etc/munge/munge.key mode=400 owner=munge group=root
+
+#######################################################
+# Tasks to setup/config mysql and necessary databases
+- name: RedHat | mysql prepare system tables
+  command: /usr/bin/mysql-systemd-start pre
+  become: true
+  become_user: mysql
+
+- name: RedHat | Start mysql_safe
+  shell: /usr/bin/mysqld_safe --user=mysql 2>&1 > /dev/null &
+  args:
+    executable: /bin/bash
+
+- name: RedHat | Wait for mysql start
+  shell: sleep 10
+  args:
+    executable: /bin/bash
+
+- name: RedHat | Set mysql root passwd
+  command: /usr/bin/mysqladmin -u root password '{{ ophdb_passwd }}'
+
+- name: RedHat | Copy template of .my.cnf to oph_user
+  template:
+    src=.my.cnf.j2
+    dest=/home/{{ oph_user }}/.my.cnf
+    mode=0600
+    owner={{ oph_user }}
+    group={{ oph_user }}
+
+- name: RedHat | Copy template of .my.cnf to root
+  template:
+    src=.my.cnf.j2
+    dest=/root/.my.cnf
+    mode=0600
+    owner=root
+    group=root
+
+- name: RedHat | import primitives
+  mysql_db: name=mysql state=import target=/usr/local/ophidia/oph-cluster/oph-primitives/etc/create_func.sql
+
+- name: RedHat | Copy template of ophdb-host.sql to root
+  template:
+    src=ophdb-host.sql.j2
+    dest=/tmp/ophdb-host.sql
+    mode=0600
+    owner=root
+    group=root
+
+- name: RedHat | import ophdb-host.sql
+  mysql_db: name=ophidiadb state=import target=/tmp/ophdb-host.sql
+
+#######################################################
+# Tasks to start the services
+- name: RedHat | start munged
+  command: /usr/sbin/munged
+  become: true
+  become_user: munge
+
+- name: RedHat | start sshd
+  command: /usr/sbin/sshd
+
+- name: RedHat | start slurmd
+  command: /usr/sbin/slurmd
+

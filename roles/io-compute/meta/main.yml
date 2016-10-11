@@ -10,4 +10,5 @@ galaxy_info:
     - 7
   galaxy_tags:
   - ophidia
-dependencies: []
+dependencies: 
+  - { role: 'indigo-dc.nfs', nfs_mode: 'client', nfs_client_imports: [{ local: "/data", remote: "/data", server_host: "{{hostvars['server']['ansible_default_ipv4']}}" }] }

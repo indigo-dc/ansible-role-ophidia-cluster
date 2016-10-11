@@ -1,4 +1,6 @@
 ---
 cert_passwd: 'abcd'
+ophdb_passwd: 'abcd'
 oph_user: 'ophuser'
+server_ip: "{{hostvars['server']['ansible_default_ipv4']}}"
 
