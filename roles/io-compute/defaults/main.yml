@@ -3,4 +3,4 @@ cert_passwd: 'abcd'
 ophdb_passwd: 'abcd'
 oph_user: 'ophuser'
 server_ip: "{{hostvars['server']['ansible_default_ipv4']}}"
-
+mysql_subnet: '127.0.0.1/255.255.255.255'

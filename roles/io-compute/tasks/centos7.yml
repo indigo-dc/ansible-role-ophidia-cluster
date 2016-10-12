@@ -30,6 +30,11 @@
     - sudo
     - wget
     - nfs-utils
+    - git
+    - gcc-c++
+    - bzip2
+    - make
+    - netcdf-devel
 
 - name: RedHat | 2nd set of packages slurm ophidia and libmatheval - the ones from the indigo repos
   yum: name={{ item }} state=latest update_cache=yes disable_gpg_check=yes
@@ -87,21 +92,6 @@
 
 - name: RedHat | Set permissions on Ophidia web space
   file: path=/data/ophidia owner={{ oph_user }} group={{ oph_user }} state=directory recurse=yes
-
-#######################################################
-# Tasks to configure the workflows
-- name: RedHat | Download the workflows
-  git: repo=https://github.com/OphidiaBigData/ophidia-workflow-catalogue.git dest=/home/{{ oph_user }}/ophidia-workflow-catalogue
-  become: yes
-  become_user: "{{ oph_user }}"
-
-- name: RedHat | Copy template of ophidia script oph_script_configuration
-  template:
-    src=oph_script_configuration.j2
-    dest=/usr/local/ophidia/oph-cluster/oph-analytics-framework/etc/oph_script_configuration
-    mode=0644
-    owner={{ oph_user }}
-    group={{ oph_user }}
 
 - include: python.yml
 

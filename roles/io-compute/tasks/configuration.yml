@@ -11,7 +11,7 @@
 - name: RedHat | Copy template of oph_dim_configuration
   template:
     src=oph_dim_configuration.j2
-    dest=/usr/local/ophidia/oph-cluster/oph-analytics-framework/etc/oph_configuration
+    dest=/usr/local/ophidia/oph-cluster/oph-analytics-framework/etc/oph_dim_configuration
     mode=0644
     owner={{ oph_user }}
     group={{ oph_user }}
@@ -87,6 +87,11 @@
 
 - name: RedHat | import ophdb-host.sql
   mysql_db: name=ophidiadb state=import target=/tmp/ophdb-host.sql
+
+- name: RedHat | Grant Mysql privileges
+  mysql_user: name=root password='{{ ophdb_passwd }}' host='{{ mysql_subnet }}' priv={{ item }}
+  with_items:
+    - db_ophidiadb_%.*:ALL
 
 #######################################################
 # Tasks to start the services

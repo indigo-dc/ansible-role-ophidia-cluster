@@ -1,3 +1,3 @@
-INSERT INTO host (hostname, cores, memory) VALUES ('{{ ansible_default_ipv4 }}',4,1);
-INSERT INTO hashost (idhostpartition, idhost) SELECT 1, host.idhost FROM host WHERE hostname='{{ ansible_default_ipv4 }}';
-INSERT INTO dbmsinstance (idhost, login, password, port) SELECT host.idhost, 'root', '{{ ophdb_passwd }}', 3306 FROM host WHERE hostname='{{ ansible_default_ipv4 }}';
+INSERT INTO host (hostname, cores, memory) VALUES ('{{ ansible_default_ipv4["address"] }}',4,1);
+INSERT INTO hashost (idhostpartition, idhost) SELECT 1, host.idhost FROM host WHERE hostname='{{ ansible_default_ipv4["address"] }}';
+INSERT INTO dbmsinstance (idhost, login, password, port) SELECT host.idhost, 'root', '{{ ophdb_passwd }}', 3306 FROM host WHERE hostname='{{ ansible_default_ipv4["address"] }}';

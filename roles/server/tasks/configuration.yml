@@ -164,7 +164,7 @@
   mysql_db: name=ophidiadb state=import target=/tmp/ophdb-host.sql
 
 - name: RedHat | Grant Mysql privileges
-  mysql_user: name=root password='{{ ophdb_passwd }}' host='{{ compute_subnet }}' priv={{ item }}
+  mysql_user: name=root password='{{ ophdb_passwd }}' host='{{ mysql_subnet }}' priv={{ item }}
   with_items:
     - ophidiadb.*:ALL
     - oph_dimensions.*:ALL

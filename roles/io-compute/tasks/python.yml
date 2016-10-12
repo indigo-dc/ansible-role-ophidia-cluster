@@ -1,4 +1,19 @@
 #######################################################
+# Tasks to configure the workflows
+- name: RedHat | Download the workflows
+  git: repo=https://github.com/OphidiaBigData/ophidia-workflow-catalogue.git dest=/home/{{ oph_user }}/ophidia-workflow-catalogue
+  become: yes
+  become_user: "{{ oph_user }}"
+
+- name: RedHat | Copy template of ophidia script oph_script_configuration
+  template:
+    src=oph_script_configuration.j2
+    dest=/usr/local/ophidia/oph-cluster/oph-analytics-framework/etc/oph_script_configuration
+    mode=0644
+    owner={{ oph_user }}
+    group={{ oph_user }}
+
+#######################################################
 # Tasks to install UV-CDAT
 - name: RedHat | Create extra folder for Python
   file: path=/usr/local/ophidia/extra/src state=directory mode=0755 owner={{ oph_user }} group={{ oph_user }}
@@ -68,4 +83,34 @@
     line='export PATH=/usr/local/ophidia/extra/anaconda3/bin:/usr/local/ophidia/extra/bin:$PATH'
   become: yes
   become_user: "{{ oph_user }}"
+
+#################################################
+# Tasks to install CDO
+- name: RedHat | Download CDO
+  get_url:
+    url: "https://code.zmaw.de/attachments/download/13175/cdo-current.tar.gz"
+    dest: /usr/local/ophidia/extra/src
+    force_basic_auth: yes
+    timeout: 1000
+  become: yes
+  become_user: "{{ oph_user }}"
+
+- name: RedHat | Extract CDO
+  unarchive: src=/usr/local/ophidia/extra/src/cdo-current.tar.gz dest=/usr/local/ophidia/extra/src
+  become: yes
+  become_user: "{{ oph_user }}"
+
+- name: RedHat | Install CDO
+  shell:
+    cd /usr/local/ophidia/extra/src/cdo-1.8.0rc4 && ./configure --with-netcdf=yes > /dev/null 2>&1 && make > /dev/null 2>&1
+  args:
+    executable: /bin/bash
+  become: yes
+  become_user: "{{ oph_user }}"
+
+- name: RedHat | Install CDO
+  shell:
+    cd /usr/local/ophidia/extra/src/cdo-1.8.0rc4 && make install > /dev/null 2>&1
+  args:
+    executable: /bin/bash
 

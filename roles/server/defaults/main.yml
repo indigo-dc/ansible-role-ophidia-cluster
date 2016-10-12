@@ -7,5 +7,6 @@ tomcat_url: 'http://it.apache.contactlab.it/tomcat/tomcat-7/v7.0.72/bin/apache-t
 thredds: 'tds-4.6.6.war'
 thredds_url: 'http://artifacts.unidata.ucar.edu/content/repositories/unidata-releases/edu/ucar/tds/4.6.6/tds-4.6.6.war'
 base_path: '/data/repository'
-server_ip: '{{ ansible_default_ipv4 }}'
+server_ip: '{{ ansible_default_ipv4["address"] }}'
 compute_subnet: '127.0.0.1'
+mysql_subnet: '127.0.0.1/255.255.255.255'
