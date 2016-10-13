@@ -100,6 +100,3 @@
   file: path=/data/ophidia owner={{ oph_user }} group={{ oph_user }} state=directory recurse=yes
 
 - include: tomcat.yml
-
-- include: configuration.yml
-

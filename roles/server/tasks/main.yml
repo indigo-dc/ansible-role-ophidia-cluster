@@ -3,6 +3,10 @@
 #  tags: package
 
 - include: centos7.yml
-  when: ansible_os_family == 'RedHat'
+  when: deploy_type == 'install'
+  tags: package
+
+- include: configuration.yml
+  when: deploy_type == 'configure'
   tags: package
 

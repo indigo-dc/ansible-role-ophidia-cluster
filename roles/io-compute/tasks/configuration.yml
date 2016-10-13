@@ -24,16 +24,30 @@
     owner={{ oph_user }}
     group={{ oph_user }}
 
-- name: RedHat | Copy template of slurm.conf
-  template:
-    src=slurm.conf.j2
-    dest=/etc/slurm/slurm.conf
+- name: RedHat | Wait for files
+  local_action: wait_for path={{ item }}
+  with_items:
+    - /etc/slurm/slurm.conf
+    - /etc/munge/munge.key
+
+- name: RedHat | Wait for nfs folder
+  wait_for: path=/data/ophidia
+
+- name: RedHat | Create symlink on Ophidia web space
+  file: src=/data/ophidia dest=/var/www/html/ophidia state=link
+
+- name: RedHat | Copy slurm.conf
+  copy: 
+    src=/etc/slurm/slurm.conf 
+    dest=/etc/slurm/slurm.conf 
     mode=0644
     owner=root
     group=root
 
-- name: RedHat | Make munge private key
-  shell: dd if=/dev/urandom bs=1 count=1024 > /etc/munge/munge.key
+- name: RedHat | Copy Munge private key
+  copy: 
+    src=/etc/munge/munge.key 
+    dest=/etc/munge/munge.key
 
 - name: RedHat | Set permissions on /etc/munge/munge.key
   file: path=/etc/munge/munge.key mode=400 owner=munge group=root
@@ -51,9 +65,7 @@
     executable: /bin/bash
 
 - name: RedHat | Wait for mysql start
-  shell: sleep 10
-  args:
-    executable: /bin/bash
+  wait_for: path=/var/lib/mysql/mysql.sock
 
 - name: RedHat | Set mysql root passwd
   command: /usr/bin/mysqladmin -u root password '{{ ophdb_passwd }}'
@@ -74,6 +86,9 @@
     owner=root
     group=root
 
+- name: RedHat | Remove hostname user
+  mysql_user: name='root' host='{{ ansible_hostname }}' state=absent
+
 - name: RedHat | import primitives
   mysql_db: name=mysql state=import target=/usr/local/ophidia/oph-cluster/oph-primitives/etc/create_func.sql
 
@@ -86,7 +101,7 @@
     group=root
 
 - name: RedHat | import ophdb-host.sql
-  mysql_db: name=ophidiadb state=import target=/tmp/ophdb-host.sql
+  mysql_db: name=ophidiadb state=import target=/tmp/ophdb-host.sql login_host={{ server_ip  }} login_user=root login_password={{ ophdb_passwd }}
 
 - name: RedHat | Grant Mysql privileges
   mysql_user: name=root password='{{ ophdb_passwd }}' host='{{ mysql_subnet }}' priv={{ item }}

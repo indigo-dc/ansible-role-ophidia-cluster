@@ -8,9 +8,10 @@
 
   <service name="all" base="" serviceType="compound">
     <service name="odap" serviceType="OpenDAP" base="/thredds/dodsC/" />
+    <service name="http" serviceType="HTTPServer" base="/thredds/fileServer/" />
   </service>
 
-  <datasetScan name="indigo" ID="indigo" path="indigo" location="{{ base_path }}/INDIGO" serviceName="odap">
+  <datasetScan name="indigo" ID="indigo" path="indigo" location="{{ base_path }}/INDIGO" serviceName="all">
     <filter>
        <include wildcard="*.nc"/>
        <include wildcard="*.png"/>

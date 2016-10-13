@@ -29,7 +29,7 @@
   become_user: "{{ oph_user }}"
 
 - name: RedHat | Extract Python
-  unarchive: src=/usr/local/ophidia/extra/src/Python-3.5.0.tgz dest=/usr/local/ophidia/extra/src
+  unarchive: src=/usr/local/ophidia/extra/src/Python-3.5.0.tgz dest=/usr/local/ophidia/extra/src copy=no
   become: yes
   become_user: "{{ oph_user }}"
 
@@ -96,7 +96,7 @@
   become_user: "{{ oph_user }}"
 
 - name: RedHat | Extract CDO
-  unarchive: src=/usr/local/ophidia/extra/src/cdo-current.tar.gz dest=/usr/local/ophidia/extra/src
+  unarchive: src=/usr/local/ophidia/extra/src/cdo-current.tar.gz dest=/usr/local/ophidia/extra/src copy=no
   become: yes
   become_user: "{{ oph_user }}"
 

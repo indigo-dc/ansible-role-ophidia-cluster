@@ -1,5 +1,5 @@
-ControlMachine=localhost
-ControlAddr=127.0.0.1
+ControlMachine={{ ansible_hostname }}
+ControlAddr={{ ansible_default_ipv4.address }}
 AuthType=auth/munge
 CryptoType=crypto/munge
 MpiDefault=none
