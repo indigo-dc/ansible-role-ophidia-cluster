@@ -32,7 +32,7 @@
     group={{ oph_user }}
 
 - name: RedHat | Run Tomcat
-  shell: /usr/local/ophidia/extra/{{ tomcat }}/bin/startup.sh
+  shell: nohup /usr/local/ophidia/extra/{{ tomcat }}/bin/startup.sh
   args:
     executable: /bin/bash
   become: yes
