@@ -3,7 +3,7 @@
 # Tasks to install Tomcat and Thredds
 - name: RedHat | Download Tomcat
   get_url:
-    url: "{{ tomcat_url }}"
+    url: "http://it.apache.contactlab.it/tomcat/tomcat-7/v7.0.72/bin/apache-tomcat-7.0.72.tar.gz"
     dest: /usr/local/ophidia/extra
     force_basic_auth: yes
     timeout: 1000
@@ -11,28 +11,28 @@
   become_user: "{{ oph_user }}"
 
 - name: RedHat | Extract Tomcat
-  unarchive: src=/usr/local/ophidia/extra/{{ tomcat }}.tar.gz dest=/usr/local/ophidia/extra
+  unarchive: src=/usr/local/ophidia/extra/apache-tomcat-7.0.72.tar.gz dest=/usr/local/ophidia/extra
   become: yes
   become_user: "{{ oph_user }}"
 
 - name: RedHat | Configure Tomcat
   template:
-    src=roles/server/templates/server.xml.j2
-    dest=/usr/local/ophidia/extra/{{ tomcat }}/conf/server.xml
+    src=server.xml.j2
+    dest=/usr/local/ophidia/extra/apache-tomcat-7.0.72/conf/server.xml
     mode=0644
     owner={{ oph_user }}
     group={{ oph_user }}
 
 - name: RedHat | Configure Tomcat
   template:
-    src=roles/server/templates/setenv.sh.j2
-    dest=/usr/local/ophidia/extra/{{ tomcat }}/bin/setenv.sh
+    src=setenv.sh.j2
+    dest=/usr/local/ophidia/extra/apache-tomcat-7.0.72/bin/setenv.sh
     mode=0644
     owner={{ oph_user }}
     group={{ oph_user }}
 
 - name: RedHat | Run Tomcat
-  shell: nohup /usr/local/ophidia/extra/{{ tomcat }}/bin/startup.sh
+  shell: nohup /usr/local/ophidia/extra/apache-tomcat-7.0.72/bin/startup.sh
   args:
     executable: /bin/bash
   become: yes
@@ -40,7 +40,7 @@
 
 - name: RedHat | Download Thredds
   get_url:
-    url: "{{ thredds_url }}"
+    url: "http://artifacts.unidata.ucar.edu/content/repositories/unidata-releases/edu/ucar/tds/4.6.6/tds-4.6.6.war"
     dest: /usr/local/ophidia/extra
     force_basic_auth: yes
     timeout: 1000
@@ -48,7 +48,7 @@
   become_user: "{{ oph_user }}"
 
 - name: RedHat | Deploy Thredds
-  command: mv /usr/local/ophidia/extra/{{ thredds }} /usr/local/ophidia/extra/{{ tomcat }}/webapps/thredds.war
+  command: mv /usr/local/ophidia/extra/tds-4.6.6.war /usr/local/ophidia/extra/apache-tomcat-7.0.72/webapps/thredds.war
   become: yes
   become_user: "{{ oph_user }}"
 
@@ -56,29 +56,29 @@
   file: path={{ base_path }} owner={{ oph_user }} group={{ oph_user }} state=directory recurse=yes
 
 - name: RedHat | Wait for Thredds deploy
-  wait_for: path=/usr/local/ophidia/extra/{{ tomcat }}/content/thredds/catalog.xml
+  wait_for: path=/usr/local/ophidia/extra/apache-tomcat-7.0.72/content/thredds/catalog.xml
 
 - name: RedHat | Configure Thredds
   template:
-    src=roles/server/templates/catalog.xml.j2
-    dest=/usr/local/ophidia/extra/{{ tomcat }}/content/thredds/catalog.xml
+    src=catalog.xml.j2
+    dest=/usr/local/ophidia/extra/apache-tomcat-7.0.72/content/thredds/catalog.xml
     mode=0644
     owner={{ oph_user }}
     group={{ oph_user }}
 
 - name: RedHat | Wait for Thredds deploy
-  wait_for: path=/usr/local/ophidia/extra/{{ tomcat }}/content/thredds/threddsConfig.xml
+  wait_for: path=/usr/local/ophidia/extra/apache-tomcat-7.0.72/content/thredds/threddsConfig.xml
 
 - name: RedHat | Configure Thredds
   template:
-    src=roles/server/templates/threddsConfig.xml.j2
-    dest=/usr/local/ophidia/extra/{{ tomcat }}/content/thredds/threddsConfig.xml
+    src=threddsConfig.xml.j2
+    dest=/usr/local/ophidia/extra/apache-tomcat-7.0.72/content/thredds/threddsConfig.xml
     mode=0644
     owner={{ oph_user }}
     group={{ oph_user }}
 
 - name: RedHat | Stop Tomcat
-  shell: /usr/local/ophidia/extra/{{ tomcat }}/bin/shutdown.sh
+  shell: /usr/local/ophidia/extra/apache-tomcat-7.0.72/bin/shutdown.sh
   args:
     executable: /bin/bash
   become: yes

@@ -80,9 +80,39 @@
     dest=/home/{{ oph_user }}/.bashrc
     regexp=''
     insertafter=EOF
-    line='export PATH=/usr/local/ophidia/extra/anaconda3/bin:/usr/local/ophidia/extra/bin:$PATH'
+    line='export PATH=/usr/local/ophidia/extra/anaconda3/bin:/usr/local/ophidia/extra/bin:$PATH\nexport UVCDAT_ANONYMOUS_LOG=no'
   become: yes
   become_user: "{{ oph_user }}"
+
+- name: RedHat | Move Anaconda to a temporary folder
+  shell:
+    mv /usr/local/ophidia/extra/anaconda3 /usr/local/ophidia/extra/anaconda3-base
+  args:
+    executable: /bin/bash
+  become: yes
+  become_user: "{{ oph_user }}"
+
+- name: RedHat | Create new folder for Anaconda
+  file: path=/usr/local/ophidia/extra/anaconda3/envs/ophidia-nox state=directory mode=0755 owner={{ oph_user }} group={{ oph_user }}
+
+- name: RedHat | Move the necessary folders of Anaconda
+  shell:
+    mv /usr/local/ophidia/extra/anaconda3-base/bin /usr/local/ophidia/extra/anaconda3-base/lib /usr/local/ophidia/extra/anaconda3
+  args:
+    executable: /bin/bash
+  become: yes
+  become_user: "{{ oph_user }}"
+
+- name: RedHat | Move the necessary folders of Anaconda
+  shell:
+    mv /usr/local/ophidia/extra/anaconda3-base/envs/ophidia-nox/bin /usr/local/ophidia/extra/anaconda3-base/envs/ophidia-nox/lib /usr/local/ophidia/extra/anaconda3-base/envs/ophidia-nox/share /usr/local/ophidia/extra/anaconda3/envs/ophidia-nox
+  args:
+    executable: /bin/bash
+  become: yes
+  become_user: "{{ oph_user }}"
+
+- name: RedHat | Drop old folder of Anaconda
+  file: path=/usr/local/ophidia/extra/anaconda3-base state=directory state=absent
 
 #################################################
 # Tasks to install CDO
@@ -113,4 +143,7 @@
     cd /usr/local/ophidia/extra/src/cdo-1.8.0rc4 && make install > /dev/null 2>&1
   args:
     executable: /bin/bash
+
+- name: RedHat | Drop folder source
+  file: path=/usr/local/ophidia/extra/src state=directory state=absent
 

@@ -1,0 +1,12 @@
+---
+cert_passwd: 'abcd'
+ophdb_passwd: 'abcd'
+oph_user: 'ophuser'
+base_path: '/data/repository'
+server_ip: '127.0.0.1'
+compute_subnet: '127.0.0.1'
+mysql_subnet: '127.0.0.1/255.255.255.255'
+deploy_type: 'install'
+slurm_nodes_name: 'oph-io'
+slurm_nodes_ips: []
+node_type: 'server'

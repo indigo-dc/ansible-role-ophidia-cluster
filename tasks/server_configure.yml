@@ -167,16 +167,16 @@
 - name: RedHat | import ophidia analytics db
   mysql_db: name=ophidiadb state=import target=/usr/local/ophidia/oph-cluster/oph-analytics-framework/etc/ophidiadb.sql
 
-- name: RedHat | Copy template of ophdb-host.sql to root
+- name: RedHat | Copy template of ophdb-partition.sql to root
   template:
-    src=ophdb-host.sql.j2
-    dest=/tmp/ophdb-host.sql
+    src=ophdb-partition.sql.j2
+    dest=/tmp/ophdb-partition.sql
     mode=0600
     owner=root
     group=root
 
-- name: RedHat | import ophdb-host.sql
-  mysql_db: name=ophidiadb state=import target=/tmp/ophdb-host.sql
+- name: RedHat | import ophdb-partition.sql
+  mysql_db: name=ophidiadb state=import target=/tmp/ophdb-partition.sql
 
 - name: RedHat | Grant Mysql privileges
   mysql_user: name=root password='{{ ophdb_passwd }}' host='{{ mysql_subnet }}' priv={{ item }}
@@ -224,7 +224,7 @@
 
 - name: RedHat | Run Tomcat
   shell:
-    nohup /usr/local/ophidia/extra/{{ tomcat }}/bin/startup.sh
+    nohup /usr/local/ophidia/extra/apache-tomcat-7.0.72/bin/startup.sh
   args:
     executable: /bin/bash
   become: yes
