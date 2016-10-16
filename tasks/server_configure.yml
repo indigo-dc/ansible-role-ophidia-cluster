@@ -40,12 +40,22 @@
 
 - name: RedHat | Make munge private key
   shell: dd if=/dev/urandom bs=1 count=1024 > /etc/munge/munge.key
+  args:
+    creates: /etc/munge/munge.key    
 
 - name: RedHat | Set permissions on /etc/munge/munge.key
   file: path=/etc/munge/munge.key mode=400 owner=munge group=root
 
 #################################################
 # Tasks for Ophidia server SSL certs
+- name: RedHat | Check root SSL cert
+  stat: path=/usr/local/ophidia/oph-server/etc/cert/cacert.pem
+  register: cacert
+
+- name: RedHat | Check server SSL cert
+  stat: path=/usr/local/ophidia/oph-server/etc/cert/myserver.pem
+  register: myserver
+
 - name: RedHat | Creating root SSL cert
   command: >
     openssl req
@@ -57,6 +67,10 @@
       -out rootreq.pem
   args:
     chdir: /usr/local/ophidia/oph-server/etc/cert
+    creates: /usr/local/ophidia/oph-server/etc/cert/rootreq.pem
+  become: yes
+  become_user: "{{ oph_user }}"
+  when: cacert.stat.exists == False or myserver.stat.exists == False
 
 - name: RedHat | Sign root SSL cert
   command: >
@@ -70,12 +84,19 @@
       -out rootcert.pem
   args:
     chdir: /usr/local/ophidia/oph-server/etc/cert
+    creates: /usr/local/ophidia/oph-server/etc/cert/rootcert.pem
+  become: yes
+  become_user: "{{ oph_user }}"
+  when: cacert.stat.exists == False or myserver.stat.exists == False
 
 - name: RedHat | merge cert and key of root cert
   shell: cat rootcert.pem rootkey.pem > cacert.pem
   args:
     chdir: /usr/local/ophidia/oph-server/etc/cert
     executable: /bin/bash
+  become: yes
+  become_user: "{{ oph_user }}"
+  when: cacert.stat.exists == False or myserver.stat.exists == False
 
 - name: RedHat | Creating server SSL cert
   command: >
@@ -88,6 +109,10 @@
       -out serverreq.pem
   args:
     chdir: /usr/local/ophidia/oph-server/etc/cert
+    creates: /usr/local/ophidia/oph-server/etc/cert/serverreq.pem
+  become: yes
+  become_user: "{{ oph_user }}"
+  when: cacert.stat.exists == False or myserver.stat.exists == False
 
 - name: RedHat | Sign server SSL cert
   command: >
@@ -103,12 +128,19 @@
       -out servercert.pem
   args:
     chdir: /usr/local/ophidia/oph-server/etc/cert
+    creates: /usr/local/ophidia/oph-server/etc/cert/servercert.pem
+  become: yes
+  become_user: "{{ oph_user }}"
+  when: cacert.stat.exists == False or myserver.stat.exists == False
 
 - name: RedHat | merge cert and key of server cert
   shell: cat servercert.pem serverkey.pem rootcert.pem > myserver.pem
   args:
     chdir: /usr/local/ophidia/oph-server/etc/cert
     executable: /bin/bash
+  become: yes
+  become_user: "{{ oph_user }}"
+  when: cacert.stat.exists == False or myserver.stat.exists == False
 
 - name: RedHat | Remove intermediate certs
   file: path={{ item }} state=absent
@@ -129,7 +161,7 @@
   become_user: mysql
 
 - name: RedHat | Start mysql_safe
-  shell: /usr/bin/mysqld_safe --user=mysql 2>&1 > /dev/null &
+  shell: pgrep mysqld_safe || (/usr/bin/mysqld_safe --user=mysql 2>&1 > /dev/null &)
   args:
     executable: /bin/bash
 
@@ -137,7 +169,7 @@
   wait_for: path=/var/lib/mysql/mysql.sock
 
 - name: RedHat | Set mysql root passwd
-  command: /usr/bin/mysqladmin -u root password '{{ ophdb_passwd }}'
+  mysql_user: name=root password={{ ophdb_passwd }}
 
 - name: RedHat | Copy template of .my.cnf to oph_user
   template:
@@ -190,11 +222,12 @@
   shell: ssh-keygen -t dsa -f /home/{{ oph_user }}/.ssh/id_dsa -N "" -q
   args:
     executable: /bin/bash
+    creates: /home/{{ oph_user }}/.ssh/id_dsa
   become: yes
   become_user: "{{ oph_user }}"
 
 - name: RedHat | Copy the key to authorized_keys file
-  shell: cat id_dsa.pub >> authorized_keys
+  shell:  (grep -f id_dsa.pub authorized_keys ) || (cat id_dsa.pub >> authorized_keys)
   args:
     chdir: /home/{{ oph_user }}/.ssh
     executable: /bin/bash
@@ -212,31 +245,31 @@
 #######################################################
 # Tasks to start the services
 - name: RedHat | start munged
-  command: /usr/sbin/munged
+  shell: pgrep munged || /usr/sbin/munged
   become: true
   become_user: munge
 
 - name: RedHat | start httpd
-  command: /usr/sbin/httpd
+  shell: pgrep httpd || /usr/sbin/httpd
 
 - name: RedHat | start sshd
-  command: /usr/sbin/sshd
+  shell: pgrep sshd || /usr/sbin/sshd
 
 - name: RedHat | Run Tomcat
   shell:
-    nohup /usr/local/ophidia/extra/apache-tomcat-7.0.72/bin/startup.sh
+    (ps aux | grep /usr/local/ophidia/extra/apache-tomcat-7.0.72 | grep -v grep)  || nohup /usr/local/ophidia/extra/apache-tomcat-7.0.72/bin/startup.sh
   args:
     executable: /bin/bash
   become: yes
   become_user: "{{ oph_user }}"
 
 - name: RedHat | start slurmctld
-  command: /usr/sbin/slurmctld
+  shell: pgrep slurmctld || /usr/sbin/slurmctld
 
 #######################################################
 # Task to start Ophidia service
 - name: RedHat | Start ophidia server
-  shell: oph_server 2>&1 > /dev/null &
+  shell: pgrep oph_server || (oph_server 2>&1 > /dev/null &)
   args:
     executable: /bin/bash
   become: yes

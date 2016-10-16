@@ -60,7 +60,7 @@
   become_user: mysql
 
 - name: RedHat | Start mysql_safe
-  shell: /usr/bin/mysqld_safe --user=mysql 2>&1 > /dev/null &
+  shell: pgrep mysqld_safe || (/usr/bin/mysqld_safe --user=mysql 2>&1 > /dev/null &)
   args:
     executable: /bin/bash
 
@@ -68,7 +68,7 @@
   wait_for: path=/var/lib/mysql/mysql.sock
 
 - name: RedHat | Set mysql root passwd
-  command: /usr/bin/mysqladmin -u root password '{{ ophdb_passwd }}'
+  mysql_user: name=root password={{ ophdb_passwd }}
 
 - name: RedHat | Copy template of .my.cnf to oph_user
   template:
@@ -111,13 +111,13 @@
 #######################################################
 # Tasks to start the services
 - name: RedHat | start munged
-  command: /usr/sbin/munged
+  shell: pgrep munged || /usr/sbin/munged
   become: true
   become_user: munge
 
 - name: RedHat | start sshd
-  command: /usr/sbin/sshd
+  shell: pgrep sshd || /usr/sbin/sshd
 
 - name: RedHat | start slurmd
-  command: /usr/sbin/slurmd
+  shell: pgrep slurmd || /usr/sbin/slurmd
 
