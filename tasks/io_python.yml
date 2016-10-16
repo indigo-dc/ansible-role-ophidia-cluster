@@ -29,7 +29,10 @@
   become_user: "{{ oph_user }}"
 
 - name: RedHat | Extract Python
-  unarchive: src=/usr/local/ophidia/extra/src/Python-3.5.0.tgz dest=/usr/local/ophidia/extra/src copy=no
+  command: tar -xzf Python-3.5.0.tgz
+  args:
+    chdir: /usr/local/ophidia/extra/src 
+    creates: /usr/local/ophidia/extra/src/Python-3.5.0
   become: yes
   become_user: "{{ oph_user }}"
 
@@ -38,6 +41,7 @@
     cd /usr/local/ophidia/extra/src/Python-3.5.0 && ./configure --prefix=/usr/local/ophidia/extra > /dev/null 2>&1 && make > /dev/null 2>&1 && make altinstall > /dev/null 2>&1
   args:
     executable: /bin/bash
+    creates: /usr/local/ophidia/extra/bin/python3.5
   become: yes
   become_user: "{{ oph_user }}"
 
@@ -60,6 +64,7 @@
   args:
     executable: /bin/bash
     chdir: /usr/local/ophidia/extra/src
+    creates: /usr/local/ophidia/extra/anaconda3
   become: yes
   become_user: "{{ oph_user }}"
   environment:
@@ -70,6 +75,7 @@
     conda create -y -n ophidia-nox -c uvcdat/label/nightly -c uvcdat uvcdat-nox
   args:
     executable: /bin/bash
+    creates: /usr/local/ophidia/extra/anaconda3/envs/ophidia-nox
   become: yes
   become_user: "{{ oph_user }}"
   environment:
@@ -84,36 +90,6 @@
   become: yes
   become_user: "{{ oph_user }}"
 
-- name: RedHat | Move Anaconda to a temporary folder
-  shell:
-    mv /usr/local/ophidia/extra/anaconda3 /usr/local/ophidia/extra/anaconda3-base
-  args:
-    executable: /bin/bash
-  become: yes
-  become_user: "{{ oph_user }}"
-
-- name: RedHat | Create new folder for Anaconda
-  file: path=/usr/local/ophidia/extra/anaconda3/envs/ophidia-nox state=directory mode=0755 owner={{ oph_user }} group={{ oph_user }}
-
-- name: RedHat | Move the necessary folders of Anaconda
-  shell:
-    mv /usr/local/ophidia/extra/anaconda3-base/bin /usr/local/ophidia/extra/anaconda3-base/lib /usr/local/ophidia/extra/anaconda3
-  args:
-    executable: /bin/bash
-  become: yes
-  become_user: "{{ oph_user }}"
-
-- name: RedHat | Move the necessary folders of Anaconda
-  shell:
-    mv /usr/local/ophidia/extra/anaconda3-base/envs/ophidia-nox/bin /usr/local/ophidia/extra/anaconda3-base/envs/ophidia-nox/lib /usr/local/ophidia/extra/anaconda3-base/envs/ophidia-nox/share /usr/local/ophidia/extra/anaconda3/envs/ophidia-nox
-  args:
-    executable: /bin/bash
-  become: yes
-  become_user: "{{ oph_user }}"
-
-- name: RedHat | Drop old folder of Anaconda
-  file: path=/usr/local/ophidia/extra/anaconda3-base state=directory state=absent
-
 #################################################
 # Tasks to install CDO
 - name: RedHat | Download CDO
@@ -125,25 +101,30 @@
   become: yes
   become_user: "{{ oph_user }}"
 
+- name: RedHat | Create CDO folder
+  file: path=/usr/local/ophidia/extra/src/cdo state=directory mode=0755 owner={{ oph_user }} group={{ oph_user }}
+
 - name: RedHat | Extract CDO
-  unarchive: src=/usr/local/ophidia/extra/src/cdo-current.tar.gz dest=/usr/local/ophidia/extra/src copy=no
+  command: tar -xzf cdo-current.tar.gz -C cdo --strip-components 1
+  args:
+    chdir: /usr/local/ophidia/extra/src 
+    creates: /usr/local/ophidia/extra/src/cdo/*
+  become: yes
+  become_user: "{{ oph_user }}"
+
+- name: RedHat | Build CDO
+  shell:
+    cd /usr/local/ophidia/extra/src/cdo && ./configure --with-netcdf=yes > /dev/null 2>&1 && make > /dev/null 2>&1
+  args:
+    executable: /bin/bash
+    creates: /usr/local/ophidia/extra/src/cdo/src/cdo
   become: yes
   become_user: "{{ oph_user }}"
 
 - name: RedHat | Install CDO
   shell:
-    cd /usr/local/ophidia/extra/src/cdo-1.8.0rc4 && ./configure --with-netcdf=yes > /dev/null 2>&1 && make > /dev/null 2>&1
+    cd /usr/local/ophidia/extra/src/cdo && make install > /dev/null 2>&1
   args:
     executable: /bin/bash
-  become: yes
-  become_user: "{{ oph_user }}"
-
-- name: RedHat | Install CDO
-  shell:
-    cd /usr/local/ophidia/extra/src/cdo-1.8.0rc4 && make install > /dev/null 2>&1
-  args:
-    executable: /bin/bash
-
-- name: RedHat | Drop folder source
-  file: path=/usr/local/ophidia/extra/src state=directory state=absent
+    creates: /usr/local/bin/cdo
 

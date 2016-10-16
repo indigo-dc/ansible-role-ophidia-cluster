@@ -11,7 +11,10 @@
   become_user: "{{ oph_user }}"
 
 - name: RedHat | Extract Tomcat
-  unarchive: src=/usr/local/ophidia/extra/apache-tomcat-7.0.72.tar.gz dest=/usr/local/ophidia/extra
+  command: tar -xzf apache-tomcat-7.0.72.tar.gz 
+  args:
+    chdir: /usr/local/ophidia/extra 
+    creates: /usr/local/ophidia/extra/apache-tomcat-7.0.72
   become: yes
   become_user: "{{ oph_user }}"
 
@@ -32,7 +35,8 @@
     group={{ oph_user }}
 
 - name: RedHat | Run Tomcat
-  shell: nohup /usr/local/ophidia/extra/apache-tomcat-7.0.72/bin/startup.sh
+  shell: 
+    (ps aux | grep /usr/local/ophidia/extra/apache-tomcat-7.0.72 | grep -v grep) || nohup /usr/local/ophidia/extra/apache-tomcat-7.0.72/bin/startup.sh
   args:
     executable: /bin/bash
   become: yes
@@ -48,9 +52,12 @@
   become_user: "{{ oph_user }}"
 
 - name: RedHat | Deploy Thredds
-  command: mv /usr/local/ophidia/extra/tds-4.6.6.war /usr/local/ophidia/extra/apache-tomcat-7.0.72/webapps/thredds.war
-  become: yes
-  become_user: "{{ oph_user }}"
+  copy: 
+    src=/usr/local/ophidia/extra/tds-4.6.6.war
+    dest=/usr/local/ophidia/extra/apache-tomcat-7.0.72/webapps/thredds.war
+    owner="{{ oph_user }}"
+    group="{{ oph_user }}"
+    remote_src=no
 
 - name: RedHat | Create base folder
   file: path={{ base_path }} owner={{ oph_user }} group={{ oph_user }} state=directory recurse=yes
@@ -78,7 +85,7 @@
     group={{ oph_user }}
 
 - name: RedHat | Stop Tomcat
-  shell: /usr/local/ophidia/extra/apache-tomcat-7.0.72/bin/shutdown.sh
+  shell: (ps aux | grep /usr/local/ophidia/extra/apache-tomcat-7.0.72 | grep -v grep) && /usr/local/ophidia/extra/apache-tomcat-7.0.72/bin/shutdown.sh
   args:
     executable: /bin/bash
   become: yes
