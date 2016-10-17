@@ -4,7 +4,8 @@
 - name: RedHat | Download Tomcat
   get_url:
     url: "http://it.apache.contactlab.it/tomcat/tomcat-7/v7.0.72/bin/apache-tomcat-7.0.72.tar.gz"
-    dest: /usr/local/ophidia/extra
+    dest: /usr/local/ophidia/extra/apache-tomcat-7.0.72.tar.gz
+    force: no
     force_basic_auth: yes
     timeout: 1000
   become: yes
@@ -45,7 +46,8 @@
 - name: RedHat | Download Thredds
   get_url:
     url: "http://artifacts.unidata.ucar.edu/content/repositories/unidata-releases/edu/ucar/tds/4.6.6/tds-4.6.6.war"
-    dest: /usr/local/ophidia/extra
+    dest: /usr/local/ophidia/extra/tds-4.6.6.war
+    force: no
     force_basic_auth: yes
     timeout: 1000
   become: yes

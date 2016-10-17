@@ -23,8 +23,9 @@
 - name: RedHat | Download Python
   get_url:
     url: https://www.python.org/ftp/python/3.5.0/Python-3.5.0.tgz
-    dest: /usr/local/ophidia/extra/src
+    dest: /usr/local/ophidia/extra/src/Python-3.5.0.tgz
     force_basic_auth: yes
+    force: no
   become: yes
   become_user: "{{ oph_user }}"
 
@@ -48,8 +49,9 @@
 - name: RedHat | Download Anaconda
   get_url:
     url: http://repo.continuum.io/archive/Anaconda3-4.0.0-Linux-x86_64.sh
-    dest: /usr/local/ophidia/extra/src
+    dest: /usr/local/ophidia/extra/src/Anaconda3-4.0.0-Linux-x86_64.sh
     force_basic_auth: yes
+    force: no
   become: yes
   become_user: "{{ oph_user }}"
 
@@ -95,7 +97,8 @@
 - name: RedHat | Download CDO
   get_url:
     url: "https://code.zmaw.de/attachments/download/13175/cdo-current.tar.gz"
-    dest: /usr/local/ophidia/extra/src
+    dest: /usr/local/ophidia/extra/src/cdo-current.tar.gz
+    force: no
     force_basic_auth: yes
     timeout: 1000
   become: yes
