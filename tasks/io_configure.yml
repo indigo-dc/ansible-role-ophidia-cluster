@@ -24,24 +24,11 @@
     owner={{ oph_user }}
     group={{ oph_user }}
 
-- name: RedHat | Wait for files
-  local_action: wait_for path={{ item }}
-  with_items:
-    - /etc/slurm/slurm.conf
-
 - name: RedHat | Wait for nfs folder
   wait_for: path=/data/ophidia
 
 - name: RedHat | Create symlink on Ophidia web space
   file: src=/data/ophidia dest=/var/www/html/ophidia state=link
-
-- name: RedHat | Copy slurm.conf
-  copy: 
-    src=/etc/slurm/slurm.conf 
-    dest=/etc/slurm/slurm.conf 
-    mode=0644
-    owner=root
-    group=root
 
 #######################################################
 # Tasks to setup/config mysql and necessary databases
@@ -104,5 +91,3 @@
 - name: RedHat | start sshd
   shell: pgrep sshd || /usr/sbin/sshd
 
-- name: RedHat | Restart slurm service
-  service: name=slurm state=restarted
