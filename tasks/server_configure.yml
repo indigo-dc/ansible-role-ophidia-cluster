@@ -16,36 +16,6 @@
     owner={{ oph_user }}
     group={{ oph_user }}
 
-- name: RedHat | Copy template of slurm.conf
-  template:
-    src=slurm.conf.j2
-    dest=/etc/slurm/slurm.conf
-    mode=0644
-    owner=root
-    group=root
-
-- name: RedHat | Change slurm.conf file
-  lineinfile: 
-    dest=/etc/slurm/slurm.conf
-    regexp='NodeName='
-    line='NodeName={{slurm_nodes_name}}[1-{{slurm_nodes_ips|length}}] CPUs=1 State=UNKNOWN'
-  when: "{{slurm_nodes_ips|length}} > 0"
-
-- name: RedHat | Change slurm.conf file
-  lineinfile: 
-    dest=/etc/slurm/slurm.conf
-    regexp='PartitionName='
-    line='PartitionName=debug Nodes={{slurm_nodes_name}}[1-{{slurm_nodes_ips|length}}] Default=YES MaxTime=INFINITE State=UP'
-  when: "{{slurm_nodes_ips|length}} > 0"
-
-- name: RedHat | Make munge private key
-  shell: dd if=/dev/urandom bs=1 count=1024 > /etc/munge/munge.key
-  args:
-    creates: /etc/munge/munge.key    
-
-- name: RedHat | Set permissions on /etc/munge/munge.key
-  file: path=/etc/munge/munge.key mode=400 owner=munge group=root
-
 #################################################
 # Tasks for Ophidia server SSL certs
 - name: RedHat | Check root SSL cert
@@ -244,11 +214,6 @@
 
 #######################################################
 # Tasks to start the services
-- name: RedHat | start munged
-  shell: pgrep munged || /usr/sbin/munged
-  become: true
-  become_user: munge
-
 - name: RedHat | start httpd
   shell: pgrep httpd || /usr/sbin/httpd
 
@@ -262,9 +227,6 @@
     executable: /bin/bash
   become: yes
   become_user: "{{ oph_user }}"
-
-- name: RedHat | start slurmctld
-  shell: pgrep slurmctld || /usr/sbin/slurmctld
 
 #######################################################
 # Task to start Ophidia service

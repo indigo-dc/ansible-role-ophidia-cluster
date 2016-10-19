@@ -24,8 +24,6 @@
     - mysql-community-devel
     - mysql-community-server
     - MySQL-python
-    - munge
-    - munge-libs
     - openssl
     - sudo
     - wget
@@ -36,15 +34,12 @@
     - make
     - netcdf-devel
 
-- name: RedHat | 2nd set of packages slurm ophidia and libmatheval - the ones from the indigo repos
+- name: RedHat | 2nd set of packages ophidia and libmatheval - the ones from the indigo repos
   yum: name={{ item }} state=latest update_cache=yes disable_gpg_check=yes
   with_items:
     - libmatheval
     - ophidia-analytics-framework
     - ophidia-primitives
-    - slurm
-    - slurm-munge
-    - slurm-plugins
 
 #################################################
 # Tasks for folder creation and file move
@@ -69,9 +64,6 @@
     state=present
     regexp=^requiretty
     line='Defaults    !requiretty'
-
-- name: RedHat | ownership of /etc/munge
-  file: path=/etc/munge owner=munge group=root
 
 #######################################################
 # Tasks to setup/config mysql and necessary databases

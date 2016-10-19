@@ -26,8 +26,6 @@
     - mysql-community-devel
     - mysql-community-server
     - MySQL-python
-    - munge
-    - munge-libs
     - openssl
     - php
     - sudo
@@ -35,15 +33,12 @@
     - nfs-utils
     - java-1.7.0-openjdk
 
-- name: RedHat | 2nd set of packages slurm ophidia and libmatheval - the ones from the indigo repos
+- name: RedHat | 2nd set of packages ophidia and libmatheval - the ones from the indigo repos
   yum: name={{ item }} state=latest update_cache=yes disable_gpg_check=yes
   with_items:
     - libmatheval
     - ophidia-server
     - ophidia-analytics-framework
-    - slurm
-    - slurm-munge
-    - slurm-plugins
 
 #################################################
 # Tasks for user and folder creation
@@ -62,12 +57,6 @@
     state=present
     regexp=^requiretty
     line='Defaults    !requiretty'
-
-- name: RedHat | Creates slurmd spool directory
-  file: path=/var/spool/slurmd state=directory owner=root group=root
-
-- name: RedHat | ownership of /etc/munge
-  file: path=/etc/munge owner=munge group=root
 
 #######################################################
 # Tasks to setup/config mysql and necessary databases

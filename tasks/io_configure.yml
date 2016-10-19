@@ -28,7 +28,6 @@
   local_action: wait_for path={{ item }}
   with_items:
     - /etc/slurm/slurm.conf
-    - /etc/munge/munge.key
 
 - name: RedHat | Wait for nfs folder
   wait_for: path=/data/ophidia
@@ -43,14 +42,6 @@
     mode=0644
     owner=root
     group=root
-
-- name: RedHat | Copy Munge private key
-  copy: 
-    src=/etc/munge/munge.key 
-    dest=/etc/munge/munge.key
-
-- name: RedHat | Set permissions on /etc/munge/munge.key
-  file: path=/etc/munge/munge.key mode=400 owner=munge group=root
 
 #######################################################
 # Tasks to setup/config mysql and necessary databases
@@ -110,14 +101,8 @@
 
 #######################################################
 # Tasks to start the services
-- name: RedHat | start munged
-  shell: pgrep munged || /usr/sbin/munged
-  become: true
-  become_user: munge
-
 - name: RedHat | start sshd
   shell: pgrep sshd || /usr/sbin/sshd
 
-- name: RedHat | start slurmd
-  shell: pgrep slurmd || /usr/sbin/slurmd
-
+- name: RedHat | Restart slurm service
+  service: name=slurm state=restarted

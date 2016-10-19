@@ -15,10 +15,23 @@
 
 #######################################################
 # Tasks to install UV-CDAT
-- name: RedHat | Create extra folder for Python
+- name: RedHat | Check if python is installed
+  stat: path=/usr/local/ophidia/extra/bin/python3.5
+  register: python_bin
+
+- name: RedHat | Check if Anaconda is installed
+  stat: path=/usr/local/ophidia/extra/anaconda3
+  register: anaconda_dir
+
+- name: RedHat | Check if cdo is installed
+  stat: path=/usr/local/bin/cdo
+  register: cdo_bin
+
+- name: RedHat | Create extra folder for source code
   file: path=/usr/local/ophidia/extra/src state=directory mode=0755 owner={{ oph_user }} group={{ oph_user }}
   become: yes
   become_user: "{{ oph_user }}"
+  when: python_bin.stat.exists == False or cdo_bin.stat.exists == False or anaconda_dir.stat.exists == False
 
 - name: RedHat | Download Python
   get_url:
@@ -28,6 +41,7 @@
     force: no
   become: yes
   become_user: "{{ oph_user }}"
+  when: python_bin.stat.exists == False
 
 - name: RedHat | Extract Python
   command: tar -xzf Python-3.5.0.tgz
@@ -36,6 +50,7 @@
     creates: /usr/local/ophidia/extra/src/Python-3.5.0
   become: yes
   become_user: "{{ oph_user }}"
+  when: python_bin.stat.exists == False
 
 - name: RedHat | Install Python
   shell:
@@ -45,6 +60,7 @@
     creates: /usr/local/ophidia/extra/bin/python3.5
   become: yes
   become_user: "{{ oph_user }}"
+  when: python_bin.stat.exists == False
 
 - name: RedHat | Download Anaconda
   get_url:
@@ -54,11 +70,13 @@
     force: no
   become: yes
   become_user: "{{ oph_user }}"
+  when: anaconda_dir.stat.exists == False
 
 - name: RedHat | Make executable the Anaconda script
   file: path=/usr/local/ophidia/extra/src/Anaconda3-4.0.0-Linux-x86_64.sh mode=0755 owner={{ oph_user }} group={{ oph_user }}
   become: yes
   become_user: "{{ oph_user }}"
+  when: anaconda_dir.stat.exists == False
 
 - name: RedHat | Install Anaconda
   shell:
@@ -71,6 +89,7 @@
   become_user: "{{ oph_user }}"
   environment:
     PATH: "/usr/local/ophidia/extra/bin:{{ ansible_env.PATH }}"
+  when: anaconda_dir.stat.exists == False
 
 - name: RedHat | Create ophidia-nox
   shell:
@@ -92,6 +111,9 @@
   become: yes
   become_user: "{{ oph_user }}"
 
+- name: RedHat | Drop useless folder in Anaconda
+  file: path=/usr/local/ophidia/extra/anaconda3/pkgs state=directory state=absent
+
 #################################################
 # Tasks to install CDO
 - name: RedHat | Download CDO
@@ -103,9 +125,11 @@
     timeout: 1000
   become: yes
   become_user: "{{ oph_user }}"
+  when: cdo_bin.stat.exists == False
 
 - name: RedHat | Create CDO folder
   file: path=/usr/local/ophidia/extra/src/cdo state=directory mode=0755 owner={{ oph_user }} group={{ oph_user }}
+  when: cdo_bin.stat.exists == False
 
 - name: RedHat | Extract CDO
   command: tar -xzf cdo-current.tar.gz -C cdo --strip-components 1
@@ -114,6 +138,7 @@
     creates: /usr/local/ophidia/extra/src/cdo/*
   become: yes
   become_user: "{{ oph_user }}"
+  when: cdo_bin.stat.exists == False
 
 - name: RedHat | Build CDO
   shell:
@@ -123,6 +148,7 @@
     creates: /usr/local/ophidia/extra/src/cdo/src/cdo
   become: yes
   become_user: "{{ oph_user }}"
+  when: cdo_bin.stat.exists == False
 
 - name: RedHat | Install CDO
   shell:
@@ -130,4 +156,7 @@
   args:
     executable: /bin/bash
     creates: /usr/local/bin/cdo
+  when: cdo_bin.stat.exists == False
 
+- name: RedHat | Drop folder source
+  file: path=/usr/local/ophidia/extra/src state=directory state=absent

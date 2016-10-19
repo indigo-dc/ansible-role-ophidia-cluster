@@ -34,7 +34,7 @@ Role variables for Ophidia cluster are:
 Dependencies
 ------------
 
-It requires indigo-dc.nfs ansible role.
+It requires indigo-dc.nfs and indigo-dc.slurm ansible role.
 
 Example Playbook
 ----------------
@@ -45,11 +45,11 @@ An example of playbook to install an Ophidia cluster:
 ---
 - hosts: oph-server
   roles:
-    - {role: 'indigo-dc.ophidia-cluster', node_type: 'server', deploy_type: 'install'}
+    - {role: 'indigo-dc.ophidia-cluster', node_type: 'server', deploy_type: 'install', slurm_nodes_ips: "{{ groups['oph-io']|map('extract', hostvars, 'ansible_default_ipv4')|list }}", server_ip: '{{ ansible_default_ipv4.address }}'}
 
 - hosts: oph-io
   roles:
-    - {role: 'indigo-dc.ophidia-cluster', node_type: 'io', deploy_type: 'install'}
+    - {role: 'indigo-dc.ophidia-cluster', node_type: 'io', deploy_type: 'install', server_ip: "{{hostvars['oph-server']['ansible_default_ipv4']}}"}
 
 ```
 
