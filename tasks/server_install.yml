@@ -2,7 +2,7 @@
 #################################################
 # Tasks to install additional repos
 - name: RedHat | Install epel-elease
-  yum: name=epel-release state=latest update_cache=yes
+  yum: name=epel-release state=latest
 
 - name: RedHat | Install mysql-community-release
   yum: name=http://repo.mysql.com/mysql-community-release-el7-7.noarch.rpm state=present
