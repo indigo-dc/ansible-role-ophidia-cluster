@@ -2,15 +2,13 @@
 #################################################
 # Tasks to install additional repos
 - name: RedHat | Install epel-elease
-  yum: name=epel-release state=latest update_cache=yes
+  yum: name=epel-release state=latest
 
 - name: RedHat | Install mysql-community-release
   yum: name=http://repo.mysql.com/mysql-community-release-el7-7.noarch.rpm state=present
 
-- name: RedHat | get the indigo repository conf
-  get_url: url={{ item.url }} dest={{ item.dest }}
-  with_items:
-    - { url: 'http://repo.indigo-datacloud.eu/repos/1/indigo1-testing.repo', dest: '/etc/yum.repos.d/indigo1-testing.repo' }
+- name: RedHat | Install the indigo repository 
+  yum: name=http://repo.indigo-datacloud.eu/repository/indigo/1/centos7/x86_64/base/indigodc-release-1.0.0-1.el7.centos.noarch.rpm state=present
 
 #################################################
 # Tasks to install packages
@@ -33,6 +31,7 @@
     - bzip2
     - make
     - netcdf-devel
+    - bc
 
 - name: RedHat | 2nd set of packages ophidia and libmatheval - the ones from the indigo repos
   yum: name={{ item }} state=latest update_cache=yes disable_gpg_check=yes

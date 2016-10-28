@@ -160,6 +160,9 @@
 - name: RedHat | Remove hostname user
   mysql_user: name='root' host='{{ ansible_hostname }}' state=absent
 
+- name: RedHat | import primitives
+  mysql_db: name=mysql state=import target=/usr/local/ophidia/oph-cluster/oph-primitives/etc/create_func.sql
+
 - name: RedHat | create ophidia databases
   mysql_db: name={{ item }} state=present
   with_items:
@@ -185,6 +188,7 @@
   with_items:
     - ophidiadb.*:ALL
     - oph_dimensions.*:ALL
+    - mysql.*:EXECUTE
 
 #######################################################
 # Tasks to generate DSA keys for oph_user
