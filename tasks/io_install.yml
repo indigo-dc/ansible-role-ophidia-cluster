@@ -70,11 +70,6 @@
   file: path=/var/log/mysqld.log owner=mysql group=root
 
 #######################################################
-# Tasks to set data in NFS shared folder
-- name: RedHat | Delete web folder
-  file: path=/var/www/html/ophidia state=absent
-
-#######################################################
 # Tasks to set permissions
 - name: RedHat | Set permissions on Ophidia folders
   file: path=/usr/local/ophidia owner={{ oph_user }} group={{ oph_user }} state=directory recurse=yes
