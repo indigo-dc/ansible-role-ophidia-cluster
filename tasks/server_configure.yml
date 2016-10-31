@@ -156,7 +156,13 @@
   wait_for: path=/var/lib/mysql/mysql.sock
 
 - name: RedHat | Set mysql root passwd
-  mysql_user: name=root password={{ ophdb_passwd }}
+  mysql_user: name=root password={{ ophdb_passwd }} host={{ item }}
+  with_items:
+    - localhost
+    - {{ ansible_hostname }}
+    - {{ ansible_nodename }}
+    - 127.0.0.1
+    - ::1
 
 - name: RedHat | Copy template of .my.cnf to oph_user
   template:
@@ -173,9 +179,6 @@
     mode=0600
     owner=root
     group=root
-
-- name: RedHat | Remove hostname user
-  mysql_user: name='root' host='{{ ansible_hostname }}' state=absent
 
 - name: RedHat | import primitives
   mysql_db: name=mysql state=import target=/usr/local/ophidia/oph-cluster/oph-primitives/etc/create_func.sql
