@@ -93,7 +93,7 @@
 
 - name: RedHat | Create ophidia-nox
   shell:
-    conda create -y -n ophidia-nox -c uvcdat/label/nightly -c uvcdat uvcdat-nox
+    conda create -y -n ophidia-nox -c uvcdat/label/nightly -c uvcdat uvcdat-nox hdf5=1.8.16 pyqt=4.11.3 jpeg=8
   args:
     executable: /bin/bash
     creates: /usr/local/ophidia/extra/anaconda3/envs/ophidia-nox
