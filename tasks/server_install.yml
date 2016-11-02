@@ -38,6 +38,7 @@
     - ophidia-server
     - ophidia-analytics-framework
     - ophidia-primitives
+    - ophidia-terminal
 
 #################################################
 # Tasks for user and folder creation
