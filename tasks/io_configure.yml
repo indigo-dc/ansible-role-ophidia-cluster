@@ -54,8 +54,8 @@
   mysql_user: name=root password={{ ophdb_passwd }} host={{ item }}
   with_items:
     - localhost
-    - {{ ansible_hostname }}
-    - {{ ansible_nodename }}
+    - "{{ ansible_hostname }}"
+    - "{{ ansible_nodename }}"
     - 127.0.0.1
     - ::1
 
