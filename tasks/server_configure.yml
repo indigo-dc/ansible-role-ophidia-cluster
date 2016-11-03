@@ -203,6 +203,17 @@
 - name: RedHat | import ophdb-partition.sql
   mysql_db: name=ophidiadb state=import target=/tmp/ophdb-partition.sql
 
+- name: RedHat | Copy template of ophdb-host.sql to root
+  template:
+    src=ophdb-host.sql.j2
+    dest=/tmp/ophdb-host.sql
+    mode=0600
+    owner=root
+    group=root
+
+- name: RedHat | import ophdb-host.sql
+  mysql_db: name=ophidiadb state=import target=/tmp/ophdb-host.sql
+
 - name: RedHat | Grant Mysql privileges
   mysql_user: name=root password='{{ ophdb_passwd }}' host='{{ mysql_subnet }}' priv={{ item }}
   with_items:

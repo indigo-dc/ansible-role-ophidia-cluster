@@ -27,9 +27,8 @@ Role variables for Ophidia cluster are:
 6. compute_subnet: subnetwork for Ophidia io-compute nodes
 7. mysql_subnet: subnetwork for Ophidia io-compute nodes (for database grant)
 8. deploy_type: type of deployment ('install' or 'configure')
-9. slurm_nodes_name: prefix for io-compute nodes
-10. slurm_nodes_ips: list of IPs of io-compute nodes
-11. node_type: type of node ('server' or 'io')
+9. io_nodes_ips: list of IPs of io-compute nodes
+10. node_type: type of node ('server' or 'io')
 
 Dependencies
 ------------
@@ -45,7 +44,7 @@ An example of playbook to install an Ophidia cluster:
 ---
 - hosts: oph-server
   roles:
-    - {role: 'indigo-dc.ophidia-cluster', node_type: 'server', deploy_type: 'install', slurm_nodes_ips: "{{ groups['oph-io']|map('extract', hostvars, 'ansible_default_ipv4')|list }}", server_ip: '{{ ansible_default_ipv4.address }}'}
+    - {role: 'indigo-dc.ophidia-cluster', node_type: 'server', deploy_type: 'install', server_ip: '{{ ansible_default_ipv4.address }}'}
 
 - hosts: oph-io
   roles:
@@ -59,7 +58,7 @@ An example of playbook to configure an Ophidia cluster:
 ---
 - hosts: oph-server
   roles:
-    - {role: 'indigo-dc.ophidia-cluster', node_type: 'server', deploy_type: 'configure', slurm_nodes_ips: "{{ groups['oph-io']|map('extract', hostvars, 'ansible_default_ipv4')|list }}", mysql_subnet: "{{ ansible_default_ipv4.network }}/{{ ansible_default_ipv4.netmask }}", compute_subnet: "{{ ansible_default_ipv4.network }}/24", server_ip: '{{ ansible_default_ipv4.address }}'}
+    - {role: 'indigo-dc.ophidia-cluster', node_type: 'server', deploy_type: 'configure', io_nodes_ips: "{{ groups['oph-io']|map('extract', hostvars, 'ansible_default_ipv4')|list }}", mysql_subnet: "{{ ansible_default_ipv4.network }}/{{ ansible_default_ipv4.netmask }}", compute_subnet: "{{ ansible_default_ipv4.network }}/24", server_ip: '{{ ansible_default_ipv4.address }}'}
 
 - hosts: oph-io
   roles:

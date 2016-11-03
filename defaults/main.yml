@@ -7,6 +7,5 @@ server_ip: '127.0.0.1'
 compute_subnet: '127.0.0.1'
 mysql_subnet: '127.0.0.1/255.255.255.255'
 deploy_type: 'install'
-slurm_nodes_name: 'ophidiaio'
-slurm_nodes_ips: []
+io_nodes_ips: []
 node_type: 'server'
