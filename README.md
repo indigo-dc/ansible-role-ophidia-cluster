@@ -81,5 +81,5 @@ Apache v2
 Author information
 ------------------
 
-ophidia-info@lists.cmcc.it
+ophidia-info@cmcc.it
 
