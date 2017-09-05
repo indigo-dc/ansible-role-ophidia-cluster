@@ -1,34 +1,15 @@
 ---
-#################################################
-# Tasks to install additional repos
-- name: RedHat | Install epel-elease
-  yum: name=epel-release state=latest
-
-- name: RedHat | Install mysql-community-release
-  yum: name=http://repo.mysql.com/mysql-community-release-el7-7.noarch.rpm state=present
-
-- name: RedHat | Install the indigo repository 
-  yum: name=http://repo.indigo-datacloud.eu/repository/indigo/1/centos7/x86_64/base/indigodc-release-1.0.0-1.el7.centos.noarch.rpm state=present
+# Common installation tasks
+- include: common_packages.yml
 
 #################################################
-# Tasks to install packages
-- name: RedHat | Install necessary packages
-  yum: name={{ item }} state=latest update_cache=yes
+# Tasks to install specific packages
+- name: RedHat | 2nd set of packages
+  yum: name={{ item }} state=latest
   with_items:
-    - curl
-    - gsoap
     - httpd
-    - libssh2
-    - mpich
-    - mpich-autoload
-    - mysql-community-devel
-    - mysql-community-server
-    - MySQL-python
-    - openssl
     - php
-    - sudo
-    - wget
-    - nfs-utils
+    - gsoap
     - java-1.7.0-openjdk
 
 - name: RedHat | 2nd set of packages ophidia and libmatheval - the ones from the indigo repos
@@ -77,4 +58,4 @@
 - name: RedHat | Set permissions on Ophidia web space
   file: path=/data/ophidia owner={{ oph_user }} group={{ oph_user }} state=directory recurse=yes
 
-- include: server_tomcat.yml
+#- include: server_tomcat.yml

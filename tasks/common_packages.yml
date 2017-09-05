@@ -1,0 +1,35 @@
+#################################################
+# Tasks to install additional repos
+- name: RedHat | Install epel-elease
+  yum: name=epel-release state=latest
+
+- name: RedHat | Install mysql-community-release
+  yum: name=http://repo.mysql.com/mysql-community-release-el7-7.noarch.rpm state=present
+
+- name: RedHat | Install the indigo repository 
+  yum: name=http://repo.indigo-datacloud.eu/repository/indigo/2/centos7/x86_64/base/indigodc-release-2.0.0-1.el7.centos.noarch.rpm state=present
+
+#################################################
+# Tasks to install common packages
+- name: RedHat | Install necessary packages
+  yum: name={{ item }} state=latest
+  with_items:
+    - curl
+    - libssh2
+    - mpich
+    - mpich-autoload
+    - mysql-community-devel
+    - mysql-community-server
+    - MySQL-python
+    - python
+    - python-pip
+    - openssl
+    - sudo
+    - wget
+    - nfs-utils
+    - git
+    - gcc-c++
+    - bzip2
+    - make
+    - netcdf-devel
+    - bc

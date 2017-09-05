@@ -1,7 +1,7 @@
 Role Name
 =========
 
-The ansible role deploys and configures all services for an Ophidia cluster. 
+The ansible role deploys and configures all services required for an Ophidia cluster. 
 
 Introduction
 ------------
@@ -22,7 +22,7 @@ Role variables for Ophidia cluster are:
 1. cert_passwd: the password for the certificates and user account
 2. ophdb_passwd: the password for MySQL
 3. oph_user: user that will run the framework
-4. base_path: base path for data
+4. base_path: base path for shared data folder
 5. server_ip: Ophidia server ip address
 6. compute_subnet: subnetwork for Ophidia io-compute nodes
 7. mysql_subnet: subnetwork for Ophidia io-compute nodes (for database grant)
@@ -44,11 +44,11 @@ An example of playbook to install an Ophidia cluster:
 ---
 - hosts: oph-server
   roles:
-    - {role: 'indigo-dc.ophidia-cluster', node_type: 'server', deploy_type: 'install', server_ip: '{{ ansible_default_ipv4.address }}'}
+    - {role: 'indigo-dc.ophidia-cluster', node_type: 'server', deploy_type: 'install'}
 
 - hosts: oph-io
   roles:
-    - {role: 'indigo-dc.ophidia-cluster', node_type: 'io', deploy_type: 'install', server_ip: "{{hostvars['oph-server']['ansible_default_ipv4']}}"}
+    - {role: 'indigo-dc.ophidia-cluster', node_type: 'io', deploy_type: 'install'}
 
 ```
 
@@ -62,14 +62,15 @@ An example of playbook to configure an Ophidia cluster:
 
 - hosts: oph-io
   roles:
-    - {role: 'indigo-dc.ophidia-cluster', node_type: 'io', deploy_type: 'configure', mysql_subnet: "{{ ansible_default_ipv4.network }}/{{ ansible_default_ipv4.netmask }}", server_ip: "{{hostvars['oph-server']['ansible_default_ipv4']}}"}
+    - {role: 'indigo-dc.ophidia-cluster', node_type: 'io', deploy_type: 'configure', mysql_subnet: "{{ ansible_default_ipv4.network }}/{{ ansible_default_ipv4.netmask }}", server_ip: "{{hostvars['oph-server']['ansible_default_ipv4']['address']}}"}
+
 
 ```
 
 Further documentation
 ---------------------
 
-* Ophidia: http://ophidia.cmcc.it/documentation/
+* Ophidia: http://ophidia.cmcc.it
 * Installation and configuration: http://ophidia.cmcc.it/documentation/admin/index.html
 
 License

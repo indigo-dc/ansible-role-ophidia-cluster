@@ -1,38 +1,8 @@
 ---
-#################################################
-# Tasks to install additional repos
-- name: RedHat | Install epel-elease
-  yum: name=epel-release state=latest
-
-- name: RedHat | Install mysql-community-release
-  yum: name=http://repo.mysql.com/mysql-community-release-el7-7.noarch.rpm state=present
-
-- name: RedHat | Install the indigo repository 
-  yum: name=http://repo.indigo-datacloud.eu/repository/indigo/1/centos7/x86_64/base/indigodc-release-1.0.0-1.el7.centos.noarch.rpm state=present
+# Common installation tasks
+- include: common_packages.yml
 
 #################################################
-# Tasks to install packages
-- name: RedHat | Install necessary packages
-  yum: name={{ item }} state=latest update_cache=yes
-  with_items:
-    - curl
-    - libssh2
-    - mpich
-    - mpich-autoload
-    - mysql-community-devel
-    - mysql-community-server
-    - MySQL-python
-    - openssl
-    - sudo
-    - wget
-    - nfs-utils
-    - git
-    - gcc-c++
-    - bzip2
-    - make
-    - netcdf-devel
-    - bc
-
 - name: RedHat | 2nd set of packages ophidia and libmatheval - the ones from the indigo repos
   yum: name={{ item }} state=latest update_cache=yes disable_gpg_check=yes
   with_items:
@@ -41,18 +11,18 @@
     - ophidia-primitives
 
 #################################################
-# Tasks for folder creation and file move
+# Tasks for user and folder creation
 - name: RedHat | Copy oph-primitives/lib to /usr/lib64/mysql/plugin
   shell: cp /usr/local/ophidia/oph-cluster/oph-primitives/lib/liboph_*.so /usr/lib64/mysql/plugin/
   args:
     executable: /bin/bash
     creates: /usr/lib64/mysql/plugin/liboph_*.so
 
-- name: RedHat | Create user for Ophidia framwork
+- name: RedHat | Create user for Ophidia framework
   user: name={{ oph_user }} shell=/bin/bash generate_ssh_key=yes ssh_key_bits=2048
 
-- name: RedHat | ownership of Ophidia framework folders
-  file: path=/usr/local/ophidia/oph-cluster/oph-analytics-framework owner={{ oph_user }} group={{ oph_user }} recurse=yes
+- name: RedHat | Creates Ophidia extra directory
+  file: path=/usr/local/ophidia/extra state=directory owner={{ oph_user }} group={{ oph_user }}
 
 - name: RedHat | Creates NFS shared directory
   file: path=/data state=directory owner=root group=root
@@ -77,4 +47,4 @@
 - name: RedHat | Set permissions on Ophidia web space
   file: path=/data/ophidia owner={{ oph_user }} group={{ oph_user }} state=directory recurse=yes
 
-- include: io_python.yml
+#- include: io_python.yml
