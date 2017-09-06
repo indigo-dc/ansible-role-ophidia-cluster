@@ -24,10 +24,7 @@
 #################################################
 # Tasks for user and folder creation
 - name: RedHat | Copy oph-primitives/lib to /usr/lib64/mysql/plugin
-  shell: cp /usr/local/ophidia/oph-cluster/oph-primitives/lib/liboph_*.so /usr/lib64/mysql/plugin/
-  args:
-    executable: /bin/bash
-    creates: /usr/lib64/mysql/plugin/liboph_*.so
+  shell: /bin/cp -rf /usr/local/ophidia/oph-cluster/oph-primitives/lib/liboph_*.so /usr/lib64/mysql/plugin/
 
 - name: RedHat | Create user for Ophidia server
   user: name={{ oph_user }} shell=/bin/bash generate_ssh_key=yes ssh_key_bits=2048
