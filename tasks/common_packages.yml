@@ -6,8 +6,11 @@
 - name: RedHat | Install mysql-community-release
   yum: name=http://repo.mysql.com/mysql-community-release-el7-7.noarch.rpm state=present
 
+- name: RedHat | Remove old indigo repository
+  yum: name=indigodc-release state=absent
+
 - name: RedHat | Install the indigo repository 
-  yum: name=http://repo.indigo-datacloud.eu/repository/indigo/2/centos7/x86_64/base/indigodc-release-2.0.0-1.el7.centos.noarch.rpm state=latest
+  yum: name=http://repo.indigo-datacloud.eu/repository/indigo/2/centos7/x86_64/base/indigodc-release-2.0.0-1.el7.centos.noarch.rpm state=present
 
 #################################################
 # Tasks to install common packages
