@@ -77,6 +77,10 @@
 
 - name: RedHat | import primitives
   mysql_db: name=mysql state=import target=/usr/local/ophidia/oph-cluster/oph-primitives/etc/create_func.sql
+  register: result
+  until: result | success
+  retries: 3
+  delay: 10
 
 - name: RedHat | Grant Mysql privileges
   mysql_user: name=root password='{{ ophdb_passwd }}' host='{{ mysql_subnet }}' priv={{ item }}
