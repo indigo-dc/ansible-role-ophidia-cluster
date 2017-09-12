@@ -4,10 +4,10 @@
   yum: name=epel-release state=latest
 
 - name: RedHat | Install mysql-community-release
-  yum: name=http://repo.mysql.com/mysql-community-release-el7-7.noarch.rpm state=present
+  yum: name=http://repo.mysql.com/mysql-community-release-el7-7.noarch.rpm state=latest
 
 - name: RedHat | Install the indigo repository 
-  yum: name=http://repo.indigo-datacloud.eu/repository/indigo/2/centos7/x86_64/base/indigodc-release-2.0.0-1.el7.centos.noarch.rpm state=present
+  yum: name=http://repo.indigo-datacloud.eu/repository/indigo/2/centos7/x86_64/base/indigodc-release-2.0.0-1.el7.centos.noarch.rpm state=latest
 
 #################################################
 # Tasks to install common packages
