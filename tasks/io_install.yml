@@ -42,6 +42,6 @@
   file: path=/usr/local/ophidia owner={{ oph_user }} group={{ oph_user }} state=directory recurse=yes
 
 - name: RedHat | Set permissions on Ophidia web space
-  file: path=/data/ophidia owner={{ oph_user }} group={{ oph_user }} state=directory recurse=yes
+  file: path=/var/www/html/ophidia owner={{ oph_user }} group={{ oph_user }} state=directory recurse=yes
 
 #- include: io_python.yml
